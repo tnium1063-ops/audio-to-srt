@@ -101,7 +101,7 @@
                 <div>
                   <button id="transcribe-btn" disabled class="w-full flex items-center justify-center px-6 py-3 bg-gradient-to-r from-sky-500 to-indigo-600 text-white font-semibold rounded-lg shadow-md hover:from-sky-600 hover:to-indigo-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105 disabled:transform-none">
                       <span id="transcribe-btn-content" class="flex items-center justify-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM18 15.75l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 18l-1.035.259a3.375 3.375 0 00-2.456 2.456L18 21.75l-.259-1.035a3.375 3.375 0 00-2.456-2.456L14.25 18l1.035-.259a3.375 3.375 0 002.456-2.456z" /></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM18 15.75l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 18l-1.035.259a3.375 3.375 0 00-2.456 2.456L18 21.75l-.259-1.035a3.375 3.375 0 00-2.456-2.456L14.25 18l1.035.259a3.375 3.375 0 002.456-2.456z" /></svg>
                         <span class="ml-2">Generate Transcription</span>
                       </span>
                       <span id="transcribe-spinner" class="hidden flex items-center justify-center">
@@ -163,53 +163,58 @@
     <script type="module">
         import { GoogleGenAI } from "@google/genai";
 
-        // --- STATE ---
-        const apiKey = 'AIzaSyD60wzbto9FLd-Fgv2mMz2FSsifRRKbTdQ'; // Hardcoded for testing
-        let audioFile = null;
-        let sourceUrl = '';
-        let originalTranscription = '';
-        let translatedTranscription = '';
-        let isLoading = false;
-        let errorMessage = '';
-        let format = 'text';
-        let copiedStates = {}; // To track copy state for multiple buttons
-        let translate = false;
-        let targetLanguage = 'English';
-        let inputType = 'file'; // 'file' or 'url'
+        // --- DOM ELEMENTS (Grab all at once) ---
+        const dom = {
+            tabFile: document.getElementById('tab-file'),
+            tabUrl: document.getElementById('tab-url'),
+            fileUploadPanel: document.getElementById('file-upload-panel'),
+            urlUploadPanel: document.getElementById('url-upload-panel'),
+            urlInput: document.getElementById('url-input'),
+            fileUploadArea: document.getElementById('file-upload-area'),
+            fileInput: document.getElementById('file-input'),
+            fileNameDisplay: document.getElementById('file-name-display'),
+            formatBtns: document.querySelectorAll('.format-btn'),
+            translateCheckbox: document.getElementById('translate-checkbox'),
+            languageSelect: document.getElementById('language-select'),
+            transcribeBtn: document.getElementById('transcribe-btn'),
+            transcribeBtnContent: document.getElementById('transcribe-btn-content'),
+            transcribeSpinner: document.getElementById('transcribe-spinner'),
+            errorDisplay: document.getElementById('error-display'),
+            resultSection: document.getElementById('result-section'),
+            resultLoader: document.getElementById('result-loader'),
+            resultDisplay: document.getElementById('result-display'),
+            resultHeading: document.getElementById('result-heading'),
+            singleResultContainer: document.getElementById('single-result-container'),
+            tableResultContainer: document.getElementById('table-result-container'),
+            resultTableBody: document.getElementById('result-table-body'),
+            transcriptionOutput: document.getElementById('transcription-output'),
+            copyBtn: document.getElementById('copy-btn'),
+            copyIconContainer: document.getElementById('copy-icon-container'),
+            copyBtnText: document.getElementById('copy-btn-text'),
+            downloadBtn: document.getElementById('download-btn'),
+            downloadBtnText: document.getElementById('download-btn-text'),
+            footerYear: document.querySelector('footer p'),
+        };
 
-        // --- DOM ELEMENTS ---
-        const tabFile = document.getElementById('tab-file');
-        const tabUrl = document.getElementById('tab-url');
-        const fileUploadPanel = document.getElementById('file-upload-panel');
-        const urlUploadPanel = document.getElementById('url-upload-panel');
-        const urlInput = document.getElementById('url-input');
-        const fileUploadArea = document.getElementById('file-upload-area');
-        const fileInput = document.getElementById('file-input');
-        const uploadPromptContainer = document.getElementById('upload-prompt-container');
-        const fileNameDisplay = document.getElementById('file-name-display');
-        const formatBtns = document.querySelectorAll('.format-btn');
-        const translateCheckbox = document.getElementById('translate-checkbox');
-        const languageSelect = document.getElementById('language-select');
-        const transcribeBtn = document.getElementById('transcribe-btn');
-        const transcribeBtnContent = document.getElementById('transcribe-btn-content');
-        const transcribeSpinner = document.getElementById('transcribe-spinner');
-        const errorDisplay = document.getElementById('error-display');
-        const resultSection = document.getElementById('result-section');
-        const resultLoader = document.getElementById('result-loader');
-        const resultDisplay = document.getElementById('result-display');
-        const resultHeading = document.getElementById('result-heading');
-        const singleResultContainer = document.getElementById('single-result-container');
-        const tableResultContainer = document.getElementById('table-result-container');
-        const resultTableBody = document.getElementById('result-table-body');
-        const transcriptionOutput = document.getElementById('transcription-output');
-        const copyBtn = document.getElementById('copy-btn');
-        const copyIconContainer = document.getElementById('copy-icon-container');
-        const copyBtnText = document.getElementById('copy-btn-text');
-        const downloadBtn = document.getElementById('download-btn');
-        const downloadBtnText = document.getElementById('download-btn-text');
-        const footerYear = document.querySelector('footer p');
+        // --- STATE MANAGEMENT ---
+        const state = {
+            apiKey: 'AIzaSyD60wzbto9FLd-Fgv2mMz2FSsifRRKbTdQ', // Hardcoded for testing
+            audioFile: null,
+            sourceUrl: '',
+            originalTranscription: '',
+            translatedTranscription: '',
+            isLoading: false,
+            errorMessage: '',
+            format: 'text',
+            translate: false,
+            targetLanguage: 'English',
+            inputType: 'file', // 'file' or 'url'
+        };
 
-        footerYear.textContent = `© ${new Date().getFullYear()} Gemini Audio Transcriber. All rights reserved.`;
+        const setState = (updates) => {
+            Object.assign(state, updates);
+            render();
+        };
 
         // --- ICONS (SVG STRINGS) ---
         const copyIconSVG = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mr-2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 01-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 0 011.5 .124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 00-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 01-1.125-1.125v-9.25m9.375 0V9.375c0 .621-.504 1.125-1.125 1.125h-1.5" /></svg>`;
@@ -258,7 +263,7 @@ ${formatInstructions}`;
         const generateTranscription = async (mediaPart, transcriptionFormat, shouldTranslate, lang) => {
              const prompt = getPrompt(transcriptionFormat, shouldTranslate, lang);
  
-             const ai = new GoogleGenAI({ apiKey: apiKey });
+             const ai = new GoogleGenAI({ apiKey: state.apiKey });
              const response = await ai.models.generateContent({
                  model: 'gemini-2.5-pro',
                  contents: { parts: [{ text: prompt }, mediaPart] },
@@ -266,7 +271,7 @@ ${formatInstructions}`;
              return response.text;
         };
 
-        // --- UI HELPER FUNCTIONS ---
+        // --- UI HELPER & RENDER FUNCTIONS ---
         const createActionButton = (type, id, text, content) => {
             const isDownload = type === 'download';
             const icon = isDownload ? 
@@ -283,97 +288,92 @@ ${formatInstructions}`;
         };
 
         const populateTable = () => {
-            resultTableBody.innerHTML = '';
+            dom.resultTableBody.innerHTML = '';
             const row = document.createElement('tr');
             row.className = 'bg-slate-800/50 align-top';
 
             const originalCell = document.createElement('td');
             originalCell.className = 'px-6 py-4';
             originalCell.innerHTML = `
-                <div class="preserve-whitespace text-slate-300 mb-4 h-64 overflow-y-auto p-2 bg-slate-900/50 rounded-md border border-slate-700">${originalTranscription || ''}</div>
+                <div class="preserve-whitespace text-slate-300 mb-4 h-64 overflow-y-auto p-2 bg-slate-900/50 rounded-md border border-slate-700">${state.originalTranscription || ''}</div>
                 <div class="flex items-center justify-end space-x-2">
-                    ${createActionButton('copy', 'original', 'Copy', originalTranscription)}
-                    ${createActionButton('download', 'original', `Download .${format}`, originalTranscription)}
+                    ${createActionButton('copy', 'original', 'Copy', state.originalTranscription)}
+                    ${createActionButton('download', 'original', `Download .${state.format}`, state.originalTranscription)}
                 </div>`;
             
             const translatedCell = document.createElement('td');
             translatedCell.className = 'px-6 py-4';
             translatedCell.innerHTML = `
-                <div class="preserve-whitespace text-slate-300 mb-4 h-64 overflow-y-auto p-2 bg-slate-900/50 rounded-md border border-slate-700">${translatedTranscription || ''}</div>
+                <div class="preserve-whitespace text-slate-300 mb-4 h-64 overflow-y-auto p-2 bg-slate-900/50 rounded-md border border-slate-700">${state.translatedTranscription || ''}</div>
                 <div class="flex items-center justify-end space-x-2">
-                    ${createActionButton('copy', 'translated', 'Copy', translatedTranscription)}
-                    ${createActionButton('download', 'translated', `Download .${format}`, translatedTranscription)}
+                    ${createActionButton('copy', 'translated', 'Copy', state.translatedTranscription)}
+                    ${createActionButton('download', 'translated', `Download .${state.format}`, state.translatedTranscription)}
                 </div>`;
             
             row.appendChild(originalCell);
             row.appendChild(translatedCell);
-            resultTableBody.appendChild(row);
+            dom.resultTableBody.appendChild(row);
         };
         
         const render = () => {
             // Button states
-            transcribeBtn.disabled = isLoading || (!audioFile && !sourceUrl);
-            copyBtn.disabled = !originalTranscription || isLoading;
-            downloadBtn.disabled = !originalTranscription || isLoading;
+            dom.transcribeBtn.disabled = state.isLoading || (!state.audioFile && !state.sourceUrl);
+            dom.copyBtn.disabled = !state.originalTranscription || state.isLoading;
+            dom.downloadBtn.disabled = !state.originalTranscription || state.isLoading;
 
             // Loading spinners
-            transcribeSpinner.classList.toggle('hidden', !isLoading);
-            transcribeBtnContent.classList.toggle('hidden', isLoading);
+            dom.transcribeSpinner.classList.toggle('hidden', state.isLoading);
+            dom.transcribeBtnContent.classList.toggle('hidden', state.isLoading);
 
             // Error display
-            errorDisplay.classList.toggle('hidden', !errorMessage);
-            errorDisplay.textContent = errorMessage;
-            if (errorMessage) {
-                resultSection.classList.add('hidden');
+            dom.errorDisplay.classList.toggle('hidden', !state.errorMessage);
+            dom.errorDisplay.textContent = state.errorMessage;
+            if (state.errorMessage) {
+                dom.resultSection.classList.add('hidden');
             }
 
             // Result section visibility
-            if (originalTranscription) {
-                resultSection.classList.remove('hidden');
-                resultLoader.classList.add('hidden');
-                resultDisplay.classList.remove('hidden');
-                if (translate) {
-                    singleResultContainer.classList.add('hidden');
-                    tableResultContainer.classList.remove('hidden');
-                    resultHeading.textContent = `4. Transcription & Translation Result`;
+            if (state.originalTranscription) {
+                dom.resultSection.classList.remove('hidden');
+                dom.resultLoader.classList.add('hidden');
+                dom.resultDisplay.classList.remove('hidden');
+                if (state.translate) {
+                    dom.singleResultContainer.classList.add('hidden');
+                    dom.tableResultContainer.classList.remove('hidden');
+                    dom.resultHeading.textContent = `4. Transcription & Translation Result`;
                     populateTable();
                 } else {
-                    singleResultContainer.classList.remove('hidden');
-                    tableResultContainer.classList.add('hidden');
-                    resultHeading.textContent = `4. Transcription Result`;
-                    transcriptionOutput.value = originalTranscription;
+                    dom.singleResultContainer.classList.remove('hidden');
+                    dom.tableResultContainer.classList.add('hidden');
+                    dom.resultHeading.textContent = `4. Transcription Result`;
+                    dom.transcriptionOutput.value = state.originalTranscription;
                 }
-            } else if (!isLoading) {
-                 resultSection.classList.add('hidden');
+            } else if (!state.isLoading) {
+                 dom.resultSection.classList.add('hidden');
             }
 
             // Update download button text
-            downloadBtnText.textContent = `Download .${format}`;
+            dom.downloadBtnText.textContent = `Download .${state.format}`;
 
-            // Tab styles
-            if (inputType === 'file') {
-                tabFile.classList.add('border-sky-500', 'text-sky-400');
-                tabFile.classList.remove('border-transparent', 'text-slate-400', 'hover:border-slate-500');
-                tabUrl.classList.add('border-transparent', 'text-slate-400', 'hover:border-slate-500');
-                tabUrl.classList.remove('border-sky-500', 'text-sky-400');
-                fileUploadPanel.classList.remove('hidden');
-                urlUploadPanel.classList.add('hidden');
-            } else {
-                tabUrl.classList.add('border-sky-500', 'text-sky-400');
-                tabUrl.classList.remove('border-transparent', 'text-slate-400', 'hover:border-slate-500');
-                tabFile.classList.add('border-transparent', 'text-slate-400', 'hover:border-slate-500');
-                tabFile.classList.remove('border-sky-500', 'text-sky-400');
-                fileUploadPanel.classList.add('hidden');
-                urlUploadPanel.classList.remove('hidden');
+            // Tab styles and panel visibility
+            if (state.inputType === 'file') {
+                dom.tabFile.classList.add('border-sky-500', 'text-sky-400');
+                dom.tabFile.classList.remove('border-transparent', 'text-slate-400', 'hover:border-slate-500');
+                dom.tabUrl.classList.add('border-transparent', 'text-slate-400', 'hover:border-slate-500');
+                dom.tabUrl.classList.remove('border-sky-500', 'text-sky-400');
+                dom.fileUploadPanel.classList.remove('hidden');
+                dom.urlUploadPanel.classList.add('hidden');
+            } else { // 'url'
+                dom.tabUrl.classList.add('border-sky-500', 'text-sky-400');
+                dom.tabUrl.classList.remove('border-transparent', 'text-slate-400', 'hover:border-slate-500');
+                dom.tabFile.classList.add('border-transparent', 'text-slate-400', 'hover:border-slate-500');
+                dom.tabFile.classList.remove('border-sky-500', 'text-sky-400');
+                dom.fileUploadPanel.classList.add('hidden');
+                dom.urlUploadPanel.classList.remove('hidden');
             }
         };
 
         // --- EVENT HANDLERS & LOGIC ---
-
-        const handleStateUpdate = (updates) => {
-            Object.assign(window, updates); // A simple way to update global state for this small app
-            render();
-        };
 
         const fileToGenerativePart = async (file) => {
             const base64EncodedDataPromise = new Promise((resolve) => {
@@ -390,13 +390,13 @@ ${formatInstructions}`;
             if (!file) return;
 
             if (file.size > 15 * 1024 * 1024) {
-                handleStateUpdate({ errorMessage: 'File size exceeds 15MB. Please choose a smaller file.' });
+                setState({ errorMessage: 'File size exceeds 15MB. Please choose a smaller file.' });
                 return;
             }
             
-            handleStateUpdate({ audioFile: file, sourceUrl: '', errorMessage: '', originalTranscription: '' });
-            fileNameDisplay.textContent = `Selected: ${file.name}`;
-            fileNameDisplay.classList.remove('hidden');
+            setState({ audioFile: file, sourceUrl: '', errorMessage: '', originalTranscription: '' });
+            dom.fileNameDisplay.textContent = `Selected: ${file.name}`;
+            dom.fileNameDisplay.classList.remove('hidden');
         };
 
         const handleCopy = async (text, btnIconContainer, btnTextEl) => {
@@ -430,39 +430,38 @@ ${formatInstructions}`;
         };
 
         const handleTranscribe = async () => {
-            handleStateUpdate({ isLoading: true, errorMessage: '', originalTranscription: '', translatedTranscription: '' });
-            resultSection.classList.remove('hidden');
-            resultLoader.classList.remove('hidden');
-            resultDisplay.classList.add('hidden');
+            setState({ isLoading: true, errorMessage: '', originalTranscription: '', translatedTranscription: '' });
+            dom.resultSection.classList.remove('hidden');
+            dom.resultLoader.classList.remove('hidden');
+            dom.resultDisplay.classList.add('hidden');
 
             try {
                 let mediaPart;
-                if (inputType === 'file' && audioFile) {
-                    mediaPart = await fileToGenerativePart(audioFile);
-                } else if (inputType === 'url' && sourceUrl) {
-                    // Basic URL validation
+                if (state.inputType === 'file' && state.audioFile) {
+                    mediaPart = await fileToGenerativePart(state.audioFile);
+                } else if (state.inputType === 'url' && state.sourceUrl) {
                     const urlPattern = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/;
-                    if (!urlPattern.test(sourceUrl)) {
+                    if (!urlPattern.test(state.sourceUrl)) {
                          throw new Error('Please enter a valid URL.');
                     }
-                    const extension = sourceUrl.split('.').pop().toLowerCase();
+                    const extension = state.sourceUrl.split('.').pop().toLowerCase();
                     const mimeTypeMap = {
                         'mp3': 'audio/mpeg', 'wav': 'audio/wav', 'ogg': 'audio/ogg', 'm4a': 'audio/mp4',
                         'mp4': 'video/mp4', 'webm': 'video/webm', 'mov': 'video/quicktime'
                     };
                     const mimeType = mimeTypeMap[extension] || 'application/octet-stream';
 
-                    mediaPart = { fileData: { mimeType: mimeType, uri: sourceUrl } };
+                    mediaPart = { fileData: { mimeType: mimeType, uri: state.sourceUrl } };
                 } else {
                     throw new Error('Please provide an audio/video source.');
                 }
                 
-                const responseText = await generateTranscription(mediaPart, format, translate, targetLanguage);
+                const responseText = await generateTranscription(mediaPart, state.format, state.translate, state.targetLanguage);
 
-                if (translate) {
+                if (state.translate) {
                     const parts = responseText.split('---TRANSLATION_SEPARATOR---');
                     if (parts.length === 2) {
-                        handleStateUpdate({
+                        setState({
                             originalTranscription: parts[0].trim(),
                             translatedTranscription: parts[1].trim()
                         });
@@ -470,7 +469,7 @@ ${formatInstructions}`;
                        throw new Error('Translation failed. The model did not provide a translated version in the expected format.');
                     }
                 } else {
-                    handleStateUpdate({ originalTranscription: responseText.trim(), translatedTranscription: '' });
+                    setState({ originalTranscription: responseText.trim(), translatedTranscription: '' });
                 }
             } catch (e) {
                 console.error(e);
@@ -479,43 +478,51 @@ ${formatInstructions}`;
                     displayError = 'Your API Key is not valid. Please check it and try again.';
                 } else if (displayError.includes('Unsupported file uri')) {
                     displayError = `The provided URL could not be accessed. This might be because it's a private link, temporary, or on a server that blocks requests. Please try downloading the file and using the "Upload File" tab.`;
-                    handleStateUpdate({ inputType: 'file' });
+                    setState({ inputType: 'file' });
                 }
-                handleStateUpdate({ errorMessage: displayError });
+                setState({ errorMessage: displayError });
             } finally {
-                handleStateUpdate({ isLoading: false });
-                resultLoader.classList.add('hidden');
+                setState({ isLoading: false });
+                dom.resultLoader.classList.add('hidden');
             }
         };
 
         // --- EVENT LISTENERS ---
-        urlInput.addEventListener('input', (e) => handleStateUpdate({ sourceUrl: e.target.value.trim(), audioFile: null, fileName: '', originalTranscription: '' }));
+        dom.urlInput.addEventListener('input', (e) => {
+          setState({ sourceUrl: e.target.value.trim(), audioFile: null, originalTranscription: '' });
+          if(e.target.value.trim()){
+            dom.fileNameDisplay.textContent = `URL: ${e.target.value.trim()}`;
+            dom.fileNameDisplay.classList.remove('hidden');
+          } else {
+            dom.fileNameDisplay.classList.add('hidden');
+          }
+        });
 
-        tabFile.addEventListener('click', () => handleStateUpdate({ inputType: 'file' }));
-        tabUrl.addEventListener('click', () => handleStateUpdate({ inputType: 'url' }));
+        dom.tabFile.addEventListener('click', () => setState({ inputType: 'file' }));
+        dom.tabUrl.addEventListener('click', () => setState({ inputType: 'url' }));
         
-        fileUploadArea.addEventListener('click', () => fileInput.click());
-        fileInput.addEventListener('change', (e) => handleFileSelect(e.target.files[0]));
+        dom.fileUploadArea.addEventListener('click', () => dom.fileInput.click());
+        dom.fileInput.addEventListener('change', (e) => handleFileSelect(e.target.files[0]));
 
         ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-            fileUploadArea.addEventListener(eventName, e => {
+            dom.fileUploadArea.addEventListener(eventName, e => {
                 e.preventDefault();
                 e.stopPropagation();
             }, false);
         });
         ['dragenter', 'dragover'].forEach(eventName => {
-            fileUploadArea.addEventListener(eventName, () => fileUploadArea.classList.add('border-sky-500', 'bg-slate-700/50'), false);
+            dom.fileUploadArea.addEventListener(eventName, () => dom.fileUploadArea.classList.add('border-sky-500', 'bg-slate-700/50'), false);
         });
         ['dragleave', 'drop'].forEach(eventName => {
-            fileUploadArea.addEventListener(eventName, () => fileUploadArea.classList.remove('border-sky-500', 'bg-slate-700/50'), false);
+            dom.fileUploadArea.addEventListener(eventName, () => dom.fileUploadArea.classList.remove('border-sky-500', 'bg-slate-700/50'), false);
         });
-        fileUploadArea.addEventListener('drop', (e) => handleFileSelect(e.dataTransfer.files[0]));
+        dom.fileUploadArea.addEventListener('drop', (e) => handleFileSelect(e.dataTransfer.files[0]));
 
-        formatBtns.forEach(btn => {
+        dom.formatBtns.forEach(btn => {
             btn.addEventListener('click', () => {
                 const selectedFormat = btn.dataset.format;
-                handleStateUpdate({ format: selectedFormat });
-                formatBtns.forEach(b => {
+                setState({ format: selectedFormat });
+                dom.formatBtns.forEach(b => {
                     b.classList.remove('bg-sky-500', 'text-white', 'shadow-lg');
                     b.classList.add('bg-slate-700', 'text-slate-300', 'hover:bg-slate-600');
                 });
@@ -524,38 +531,39 @@ ${formatInstructions}`;
             });
         });
 
-        translateCheckbox.addEventListener('change', (e) => {
-            handleStateUpdate({ translate: e.target.checked });
-            languageSelect.classList.toggle('hidden', !e.target.checked);
+        dom.translateCheckbox.addEventListener('change', (e) => {
+            setState({ translate: e.target.checked });
+            dom.languageSelect.classList.toggle('hidden', !e.target.checked);
         });
 
-        languageSelect.addEventListener('change', (e) => handleStateUpdate({ targetLanguage: e.target.value }));
+        dom.languageSelect.addEventListener('change', (e) => setState({ targetLanguage: e.target.value }));
 
-        transcribeBtn.addEventListener('click', handleTranscribe);
+        dom.transcribeBtn.addEventListener('click', handleTranscribe);
 
-        copyBtn.addEventListener('click', () => handleCopy(originalTranscription, copyIconContainer, copyBtnText));
-        downloadBtn.addEventListener('click', () => handleDownload(originalTranscription, format));
+        dom.copyBtn.addEventListener('click', () => handleCopy(state.originalTranscription, dom.copyIconContainer, dom.copyBtnText));
+        dom.downloadBtn.addEventListener('click', () => handleDownload(state.originalTranscription, state.format));
         
-        resultTableBody.addEventListener('click', (e) => {
+        dom.resultTableBody.addEventListener('click', (e) => {
             const button = e.target.closest('button');
             if (!button) return;
 
             const contentId = button.dataset.contentId;
             const isCopy = button.id.startsWith('copy-btn');
             const isDownload = button.id.startsWith('download-btn');
-            const contentToUse = contentId === 'original' ? originalTranscription : translatedTranscription;
+            const contentToUse = contentId === 'original' ? state.originalTranscription : state.translatedTranscription;
 
             if (isCopy) {
                 const iconContainer = button.querySelector(`#icon-container-copy-${contentId}`);
                 const textEl = button.querySelector(`#btn-text-copy-${contentId}`);
                 handleCopy(contentToUse, iconContainer, textEl);
             } else if (isDownload) {
-                handleDownload(contentToUse, format);
+                handleDownload(contentToUse, state.format);
             }
         });
 
-        // Initial Render
-        render();
+        // --- INITIALIZATION ---
+        dom.footerYear.textContent = `© ${new Date().getFullYear()} Gemini Audio Transcriber. All rights reserved.`;
+        render(); // Initial Render
 
     </script>
   </body>
