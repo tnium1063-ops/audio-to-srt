@@ -125,7 +125,7 @@
                        <textarea id="transcription-output" readonly class="w-full h-64 p-4 bg-slate-800 border border-slate-700 rounded-md text-slate-300 focus:ring-2 focus:ring-sky-500 focus:outline-none resize-y preserve-whitespace" placeholder="Transcription will appear here..."></textarea>
                        <div class="flex items-center justify-end space-x-4 mt-4">
                          <button id="copy-btn" class="flex items-center px-4 py-2 bg-slate-700 text-slate-300 rounded-md hover:bg-slate-600 transition-colors disabled:opacity-50" disabled>
-                           <span id="copy-icon-container"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mr-2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 01-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 011.5 .124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 00-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 01-1.125-1.125v-9.25m9.375 0V9.375c0 .621-.504 1.125-1.125 1.125h-1.5" /></svg></span>
+                           <span id="copy-icon-container"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mr-2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 01-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 0 011.5 .124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 00-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 01-1.125-1.125v-9.25m9.375 0V9.375c0 .621-.504 1.125-1.125 1.125h-1.5" /></svg></span>
                            <span id="copy-btn-text">Copy</span>
                          </button>
                          <button id="download-btn" class="flex items-center px-4 py-2 bg-sky-600 text-white rounded-md hover:bg-sky-500 transition-colors disabled:opacity-50" disabled>
@@ -164,6 +164,7 @@
         import { GoogleGenAI } from "@google/genai";
 
         // --- STATE ---
+        const apiKey = 'AIzaSyD60wzbto9FLd-Fgv2mMz2FSsifRRKbTdQ'; // Hardcoded for testing
         let audioFile = null;
         let sourceUrl = '';
         let originalTranscription = '';
@@ -211,7 +212,7 @@
         footerYear.textContent = `© ${new Date().getFullYear()} Gemini Audio Transcriber. All rights reserved.`;
 
         // --- ICONS (SVG STRINGS) ---
-        const copyIconSVG = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mr-2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 01-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 011.5 .124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 00-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 01-1.125-1.125v-9.25m9.375 0V9.375c0 .621-.504 1.125-1.125 1.125h-1.5" /></svg>`;
+        const copyIconSVG = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mr-2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 01-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 0 011.5 .124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 00-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 01-1.125-1.125v-9.25m9.375 0V9.375c0 .621-.504 1.125-1.125 1.125h-1.5" /></svg>`;
         const checkIconSVG = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mr-2 text-green-400"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>`;
 
         // --- GEMINI SERVICE LOGIC ---
@@ -257,7 +258,7 @@ ${formatInstructions}`;
         const generateTranscription = async (mediaPart, transcriptionFormat, shouldTranslate, lang) => {
              const prompt = getPrompt(transcriptionFormat, shouldTranslate, lang);
  
-             const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+             const ai = new GoogleGenAI({ apiKey: apiKey });
              const response = await ai.models.generateContent({
                  model: 'gemini-2.5-pro',
                  contents: { parts: [{ text: prompt }, mediaPart] },
@@ -266,8 +267,23 @@ ${formatInstructions}`;
         };
 
         // --- UI HELPER FUNCTIONS ---
+        const createActionButton = (type, id, text, content) => {
+            const isDownload = type === 'download';
+            const icon = isDownload ? 
+                `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mr-2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>` :
+                copyIconSVG;
+
+            const baseClasses = 'flex items-center px-4 py-2 rounded-md transition-colors disabled:opacity-50 text-sm';
+            const colorClasses = isDownload ? 'bg-sky-600 text-white hover:bg-sky-500' : 'bg-slate-700 text-slate-300 hover:bg-slate-600';
+
+            return `<button id="${type}-btn-${id}" data-content-id="${id}" class="${baseClasses} ${colorClasses}" ${!content ? 'disabled' : ''}>
+                        <span id="icon-container-${type}-${id}">${icon}</span>
+                        <span id="btn-text-${type}-${id}">${text}</span>
+                    </button>`;
+        };
+
         const populateTable = () => {
-            resultTableBody.innerHTML = ''; // Clear previous results
+            resultTableBody.innerHTML = '';
             const row = document.createElement('tr');
             row.className = 'bg-slate-800/50 align-top';
 
@@ -277,382 +293,270 @@ ${formatInstructions}`;
                 <div class="preserve-whitespace text-slate-300 mb-4 h-64 overflow-y-auto p-2 bg-slate-900/50 rounded-md border border-slate-700">${originalTranscription || ''}</div>
                 <div class="flex items-center justify-end space-x-2">
                     ${createActionButton('copy', 'original', 'Copy', originalTranscription)}
-                    ${createActionButton('download', 'original', `Download`, originalTranscription)}
+                    ${createActionButton('download', 'original', `Download .${format}`, originalTranscription)}
                 </div>`;
             
             const translatedCell = document.createElement('td');
             translatedCell.className = 'px-6 py-4';
-             translatedCell.innerHTML = `
+            translatedCell.innerHTML = `
                 <div class="preserve-whitespace text-slate-300 mb-4 h-64 overflow-y-auto p-2 bg-slate-900/50 rounded-md border border-slate-700">${translatedTranscription || ''}</div>
                 <div class="flex items-center justify-end space-x-2">
                     ${createActionButton('copy', 'translated', 'Copy', translatedTranscription)}
-                    ${createActionButton('download', 'translated', `Download`, translatedTranscription)}
+                    ${createActionButton('download', 'translated', `Download .${format}`, translatedTranscription)}
                 </div>`;
-
+            
             row.appendChild(originalCell);
             row.appendChild(translatedCell);
             resultTableBody.appendChild(row);
-            
-            // Re-attach event listeners for the new buttons
-            document.querySelectorAll('.action-btn-copy').forEach(btn => btn.addEventListener('click', () => handleCopy(btn.dataset.type, btn.dataset.content)));
-            document.querySelectorAll('.action-btn-download').forEach(btn => btn.addEventListener('click', () => handleDownload(btn.dataset.content, btn.dataset.type)));
         };
         
-        const createActionButton = (action, type, text, content) => {
-            const isCopied = copiedStates[`${action}-${type}`];
-            const icon = action === 'copy'
-                ? (isCopied ? checkIconSVG : copyIconSVG)
-                : `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mr-2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>`;
-            
-            const btnText = action === 'copy' ? (isCopied ? 'Copied!' : 'Copy') : `Download .${format}`;
-            const btnClass = action === 'copy' 
-                ? 'bg-slate-700 text-slate-300 hover:bg-slate-600'
-                : 'bg-sky-600 text-white hover:bg-sky-500';
+        const render = () => {
+            // Button states
+            transcribeBtn.disabled = isLoading || (!audioFile && !sourceUrl);
+            copyBtn.disabled = !originalTranscription || isLoading;
+            downloadBtn.disabled = !originalTranscription || isLoading;
 
-            return `
-                <button 
-                    class="action-btn-${action} flex items-center px-3 py-1.5 text-xs font-medium rounded-md transition-colors disabled:opacity-50 ${btnClass}"
-                    data-type="${type}" 
-                    data-content="${encodeURIComponent(content)}"
-                    ${!content ? 'disabled' : ''}
-                >
-                    ${icon}
-                    <span>${btnText}</span>
-                </button>`;
-        };
-
-
-        // --- UI UPDATE LOGIC ---
-        const updateUI = () => {
-            // Tabs
-            const activeTabClass = 'border-sky-500 text-sky-400';
-            const inactiveTabClass = 'border-transparent text-slate-400 hover:border-slate-500 hover:text-slate-300';
-            tabFile.className = `input-tab-btn px-4 py-2 text-sm font-medium border-b-2 ${inputType === 'file' ? activeTabClass : inactiveTabClass}`;
-            tabUrl.className = `input-tab-btn px-4 py-2 text-sm font-medium border-b-2 ${inputType === 'url' ? activeTabClass : inactiveTabClass}`;
-            fileUploadPanel.classList.toggle('hidden', inputType !== 'file');
-            urlUploadPanel.classList.toggle('hidden', inputType !== 'url');
-            
-            // Source display
-            const hasSource = audioFile || sourceUrl;
-            fileNameDisplay.classList.toggle('hidden', !hasSource);
-            if (audioFile) {
-                fileNameDisplay.textContent = `File selected: ${audioFile.name}`;
-            } else if (sourceUrl) {
-                fileNameDisplay.textContent = `URL loaded: ${sourceUrl}`;
-            }
-
-            // Format buttons
-            formatBtns.forEach(btn => {
-                const isActive = btn.dataset.format === format;
-                btn.className = `format-btn px-6 py-2 rounded-full text-sm font-medium transition-all duration-200 ${isActive ? 'bg-sky-500 text-white shadow-lg' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}`;
-            });
-            downloadBtnText.textContent = `Download .${format}`;
-
-            // Translation controls
-            languageSelect.classList.toggle('hidden', !translate);
-            
-            // Transcribe button
-            transcribeBtn.disabled = !hasSource || isLoading;
-            transcribeBtnContent.classList.toggle('hidden', isLoading);
+            // Loading spinners
             transcribeSpinner.classList.toggle('hidden', !isLoading);
-            
+            transcribeBtnContent.classList.toggle('hidden', isLoading);
+
             // Error display
             errorDisplay.classList.toggle('hidden', !errorMessage);
             errorDisplay.textContent = errorMessage;
             if (errorMessage) {
-                if (errorMessage.toLowerCase().startsWith('error:')) {
-                    errorDisplay.className = 'p-4 bg-red-900/50 border border-red-700 text-red-300 rounded-md preserve-whitespace';
-                } else {
-                     errorDisplay.className = 'p-4 bg-yellow-900/50 border border-yellow-700 text-yellow-300 rounded-md preserve-whitespace';
-                }
+                resultSection.classList.add('hidden');
             }
-            
-            // Result section
-            const hasResult = originalTranscription || translatedTranscription;
-            const showResultSection = hasResult || isLoading;
-            resultSection.classList.toggle('hidden', !showResultSection);
 
-            if (showResultSection) {
-                const showLoader = isLoading && !hasResult;
-                resultLoader.classList.toggle('hidden', !showLoader);
-                resultDisplay.classList.toggle('hidden', showLoader || !hasResult);
-                
-                if (hasResult) {
-                    singleResultContainer.classList.toggle('hidden', translate);
-                    tableResultContainer.classList.toggle('hidden', !translate);
-
-                    if (translate) {
-                        populateTable();
-                        resultHeading.textContent = `4. Transcription & Translation`;
-                    } else {
-                        transcriptionOutput.value = originalTranscription;
-                        const hasTranscription = originalTranscription.length > 0;
-                        copyBtn.disabled = !hasTranscription;
-                        downloadBtn.disabled = !hasTranscription;
-                        if (copiedStates['copy-single']) {
-                            copyBtnText.textContent = 'Copied!';
-                            copyIconContainer.innerHTML = checkIconSVG;
-                        } else {
-                            copyBtnText.textContent = 'Copy';
-                            copyIconContainer.innerHTML = copyIconSVG;
-                        }
-                        resultHeading.textContent = '4. Result';
-                    }
+            // Result section visibility
+            if (originalTranscription) {
+                resultSection.classList.remove('hidden');
+                resultLoader.classList.add('hidden');
+                resultDisplay.classList.remove('hidden');
+                if (translate) {
+                    singleResultContainer.classList.add('hidden');
+                    tableResultContainer.classList.remove('hidden');
+                    resultHeading.textContent = `4. Transcription & Translation Result`;
+                    populateTable();
                 } else {
-                    resultHeading.textContent = '4. Result';
+                    singleResultContainer.classList.remove('hidden');
+                    tableResultContainer.classList.add('hidden');
+                    resultHeading.textContent = `4. Transcription Result`;
+                    transcriptionOutput.value = originalTranscription;
                 }
+            } else if (!isLoading) {
+                 resultSection.classList.add('hidden');
+            }
+
+            // Update download button text
+            downloadBtnText.textContent = `Download .${format}`;
+
+            // Tab styles
+            if (inputType === 'file') {
+                tabFile.classList.add('border-sky-500', 'text-sky-400');
+                tabFile.classList.remove('border-transparent', 'text-slate-400', 'hover:border-slate-500');
+                tabUrl.classList.add('border-transparent', 'text-slate-400', 'hover:border-slate-500');
+                tabUrl.classList.remove('border-sky-500', 'text-sky-400');
+                fileUploadPanel.classList.remove('hidden');
+                urlUploadPanel.classList.add('hidden');
+            } else {
+                tabUrl.classList.add('border-sky-500', 'text-sky-400');
+                tabUrl.classList.remove('border-transparent', 'text-slate-400', 'hover:border-slate-500');
+                tabFile.classList.add('border-transparent', 'text-slate-400', 'hover:border-slate-500');
+                tabFile.classList.remove('border-sky-500', 'text-sky-400');
+                fileUploadPanel.classList.add('hidden');
+                urlUploadPanel.classList.remove('hidden');
             }
         };
 
-        // --- EVENT HANDLERS ---
-        const MAX_INLINE_FILE_SIZE_BYTES = 15 * 1024 * 1024;
-        
+        // --- EVENT HANDLERS & LOGIC ---
+
+        const handleStateUpdate = (updates) => {
+            Object.assign(window, updates); // A simple way to update global state for this small app
+            render();
+        };
+
+        const fileToGenerativePart = async (file) => {
+            const base64EncodedDataPromise = new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onloadend = () => resolve(reader.result.split(',')[1]);
+                reader.readAsDataURL(file);
+            });
+            return {
+                inlineData: { data: await base64EncodedDataPromise, mimeType: file.type },
+            };
+        };
+
         const handleFileSelect = (file) => {
-            if (file.size > MAX_INLINE_FILE_SIZE_BYTES) {
-                errorMessage = `Error: Files larger than 15MB are not supported for local upload due to browser limitations. Please use a smaller file or provide a URL.`;
-                audioFile = null;
-            } else {
-                audioFile = file;
-                errorMessage = '';
-            }
-            sourceUrl = '';
-            originalTranscription = '';
-            translatedTranscription = '';
-            updateUI();
-        };
+            if (!file) return;
 
-        const handleUrlChange = () => {
-            const url = urlInput.value.trim();
-            if (url) {
-                sourceUrl = url;
-                audioFile = null;
-                errorMessage = '';
-            } else {
-                sourceUrl = '';
-            }
-             originalTranscription = '';
-             translatedTranscription = '';
-             updateUI();
-        }
-
-        const handleTranscribe = async () => {
-            if (!audioFile && !sourceUrl) {
-                errorMessage = 'Please select a file or provide a URL first.';
-                updateUI();
+            if (file.size > 15 * 1024 * 1024) {
+                handleStateUpdate({ errorMessage: 'File size exceeds 15MB. Please choose a smaller file.' });
                 return;
             }
             
-            isLoading = true;
-            originalTranscription = '';
-            translatedTranscription = '';
-            errorMessage = '';
-            updateUI();
+            handleStateUpdate({ audioFile: file, sourceUrl: '', errorMessage: '', originalTranscription: '' });
+            fileNameDisplay.textContent = `Selected: ${file.name}`;
+            fileNameDisplay.classList.remove('hidden');
+        };
 
+        const handleCopy = async (text, btnIconContainer, btnTextEl) => {
             try {
-                if (!process.env.API_KEY) {
-                    throw new Error("API key is missing. Please set the API_KEY environment variable.");
-                }
-
-                let mediaPart;
-
-                if (inputType === 'file' && audioFile) {
-                    // Process local file
-                    const blob = audioFile;
-                    mediaPart = await new Promise((resolve, reject) => {
-                        const reader = new FileReader();
-                        reader.onloadend = () => {
-                            if (typeof reader.result === 'string') {
-                                resolve({
-                                    inlineData: { data: reader.result.split(',')[1], mimeType: blob.type },
-                                });
-                            } else {
-                                reject(new Error("Failed to read blob."));
-                            }
-                        };
-                        reader.onerror = (error) => reject(error);
-                        reader.readAsDataURL(blob);
-                    });
-                } else if (inputType === 'url' && sourceUrl) {
-                    // Process URL
-                    const headResponse = await fetch(sourceUrl, { method: 'HEAD' });
-                    if (!headResponse.ok) {
-                        throw new Error(`Could not access URL. Status: ${headResponse.status}. Please ensure it's a direct, public link.`);
-                    }
-                    const contentType = headResponse.headers.get('Content-Type');
-                    let finalMimeType = contentType;
-
-                    const isKnownMediaType = contentType && (contentType.startsWith('audio/') || contentType.startsWith('video/'));
-                    
-                    if (!isKnownMediaType) {
-                        if (contentType === 'application/octet-stream') {
-                            // Server provided a generic type. Let's try to guess from the URL extension.
-                            const extension = sourceUrl.split('.').pop()?.toLowerCase().split('?')[0];
-                            const mimeMap = {
-                                'mp4': 'video/mp4', 'm4v': 'video/mp4', 'mov': 'video/quicktime', 'avi': 'video/x-msvideo', 'wmv': 'video/x-ms-wmv', 'flv': 'video/x-flv', 'webm': 'video/webm',
-                                'mp3': 'audio/mpeg', 'wav': 'audio/wav', 'ogg': 'audio/ogg', 'm4a': 'audio/mp4', 'flac': 'audio/flac',
-                            };
-                            if (extension && mimeMap[extension]) {
-                                finalMimeType = mimeMap[extension];
-                            } else {
-                                // We couldn't guess the type from the URL. Inform the user and switch to upload.
-                                setInputType('file'); 
-                                throw new Error(`The URL provided a generic file type ('application/octet-stream') and the specific media type could not be determined from the URL. \nSuggestion: Please download the file and use the "Upload File" tab.`);
-                            }
-                        } else {
-                            // It's not a known media type and not a generic stream we can guess from.
-                            throw new Error(`URL does not appear to point to a valid media file. Found content type: ${contentType || 'unknown'}`);
-                        }
-                    }
-                    
-                    mediaPart = {
-                        fileData: {
-                            mimeType: finalMimeType,
-                            fileUri: sourceUrl
-                        }
-                    };
-                } else {
-                    throw new Error("No valid source provided.");
-                }
-
-                const result = await generateTranscription(mediaPart, format, translate, targetLanguage);
-
-                if (result.includes('---TRANSLATION_SEPARATOR---')) {
-                    const parts = result.split('---TRANSLATION_SEPARATOR---');
-                    originalTranscription = parts[0]?.trim() || 'Could not parse original text.';
-                    translatedTranscription = parts[1]?.trim() || 'Could not parse translated text.';
-                } else {
-                    originalTranscription = result;
-                }
-                
-            } catch (e) {
-                console.error("Error during processing:", e);
-                // Check for the specific "Unsupported file uri" error from Gemini
-                if (e.message && e.message.includes('Unsupported file uri')) {
-                    // Switch back to the file tab to guide the user to the workaround
-                    setInputType('file');
-                    // And then display a clear error message
-                    errorMessage = `Error: The provided URL could not be accessed. This can happen if the link is private, temporary, or blocked from server access.\nSuggestion: Please download the file and use the "Upload File" tab instead.`;
-                } else {
-                    errorMessage = `Error: ${e.message}`;
-                    if (typeof e === 'object' && e !== null && 'toString' in e && e.toString().includes('400')) {
-                        errorMessage += "\nThis might be due to an unsupported file format, a corrupted file, or a general issue with the provided source.";
-                    }
-                }
-            } finally {
-                isLoading = false;
-                updateUI();
+                await navigator.clipboard.writeText(text);
+                btnIconContainer.innerHTML = checkIconSVG;
+                btnTextEl.textContent = 'Copied!';
+                setTimeout(() => {
+                    btnIconContainer.innerHTML = copyIconSVG;
+                    btnTextEl.textContent = 'Copy';
+                }, 2000);
+            } catch (err) {
+                console.error('Failed to copy text: ', err);
+                btnTextEl.textContent = 'Error';
+                 setTimeout(() => {
+                    btnTextEl.textContent = 'Copy';
+                }, 2000);
             }
         };
-        
-        const handleDownload = (content, type) => {
-            const textToDownload = decodeURIComponent(content);
-            const blob = new Blob([textToDownload], { type: 'text/plain' });
+
+        const handleDownload = (text, format) => {
+            const blob = new Blob([text], { type: 'text/plain' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            const fileName = type === 'translated' ? `translation.${format}` : `transcription.${format}`;
-
-            a.download = fileName;
+            a.download = `transcription.${format}`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
         };
-        
-        const handleCopy = (type, content) => {
-            const textToCopy = decodeURIComponent(content);
-            if (!textToCopy) return;
-            navigator.clipboard.writeText(textToCopy);
-            
-            const copyKey = `copy-${type}`;
-            copiedStates[copyKey] = true;
-            updateUI();
-            
-            setTimeout(() => {
-                copiedStates[copyKey] = false;
-                updateUI();
-            }, 2000);
-        };
 
-        const setInputType = (newType) => {
-            inputType = newType;
-            audioFile = null;
-            sourceUrl = '';
-            errorMessage = '';
-            urlInput.value = '';
-            fileInput.value = '';
-            updateUI();
-        };
+        const handleTranscribe = async () => {
+            handleStateUpdate({ isLoading: true, errorMessage: '', originalTranscription: '', translatedTranscription: '' });
+            resultSection.classList.remove('hidden');
+            resultLoader.classList.remove('hidden');
+            resultDisplay.classList.add('hidden');
 
-        // --- ATTACH EVENT LISTENERS ---
-        tabFile.addEventListener('click', () => setInputType('file'));
-        tabUrl.addEventListener('click', () => setInputType('url'));
-        urlInput.addEventListener('change', handleUrlChange);
-        urlInput.addEventListener('paste', () => setTimeout(handleUrlChange, 0)); // handle paste
+            try {
+                let mediaPart;
+                if (inputType === 'file' && audioFile) {
+                    mediaPart = await fileToGenerativePart(audioFile);
+                } else if (inputType === 'url' && sourceUrl) {
+                    // Basic URL validation
+                    const urlPattern = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/;
+                    if (!urlPattern.test(sourceUrl)) {
+                         throw new Error('Please enter a valid URL.');
+                    }
+                    const extension = sourceUrl.split('.').pop().toLowerCase();
+                    const mimeTypeMap = {
+                        'mp3': 'audio/mpeg', 'wav': 'audio/wav', 'ogg': 'audio/ogg', 'm4a': 'audio/mp4',
+                        'mp4': 'video/mp4', 'webm': 'video/webm', 'mov': 'video/quicktime'
+                    };
+                    const mimeType = mimeTypeMap[extension] || 'application/octet-stream';
 
+                    mediaPart = { fileData: { mimeType: mimeType, uri: sourceUrl } };
+                } else {
+                    throw new Error('Please provide an audio/video source.');
+                }
+                
+                const responseText = await generateTranscription(mediaPart, format, translate, targetLanguage);
 
-        fileUploadArea.addEventListener('click', () => fileInput.click());
-        fileUploadArea.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                fileInput.click();
+                if (translate) {
+                    const parts = responseText.split('---TRANSLATION_SEPARATOR---');
+                    if (parts.length === 2) {
+                        handleStateUpdate({
+                            originalTranscription: parts[0].trim(),
+                            translatedTranscription: parts[1].trim()
+                        });
+                    } else {
+                       throw new Error('Translation failed. The model did not provide a translated version in the expected format.');
+                    }
+                } else {
+                    handleStateUpdate({ originalTranscription: responseText.trim(), translatedTranscription: '' });
+                }
+            } catch (e) {
+                console.error(e);
+                let displayError = e.message;
+                if (displayError.includes('API key not valid')) {
+                    displayError = 'Your API Key is not valid. Please check it and try again.';
+                } else if (displayError.includes('Unsupported file uri')) {
+                    displayError = `The provided URL could not be accessed. This might be because it's a private link, temporary, or on a server that blocks requests. Please try downloading the file and using the "Upload File" tab.`;
+                    handleStateUpdate({ inputType: 'file' });
+                }
+                handleStateUpdate({ errorMessage: displayError });
+            } finally {
+                handleStateUpdate({ isLoading: false });
+                resultLoader.classList.add('hidden');
             }
-        });
+        };
 
-        fileInput.addEventListener('change', (e) => {
-            if (e.target.files && e.target.files[0]) handleFileSelect(e.target.files[0]);
-        });
+        // --- EVENT LISTENERS ---
+        urlInput.addEventListener('input', (e) => handleStateUpdate({ sourceUrl: e.target.value.trim(), audioFile: null, fileName: '', originalTranscription: '' }));
+
+        tabFile.addEventListener('click', () => handleStateUpdate({ inputType: 'file' }));
+        tabUrl.addEventListener('click', () => handleStateUpdate({ inputType: 'url' }));
         
+        fileUploadArea.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', (e) => handleFileSelect(e.target.files[0]));
+
         ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
             fileUploadArea.addEventListener(eventName, e => {
                 e.preventDefault();
                 e.stopPropagation();
-            });
+            }, false);
         });
-        
         ['dragenter', 'dragover'].forEach(eventName => {
-            fileUploadArea.addEventListener(eventName, () => {
-                fileUploadArea.classList.add('border-sky-400', 'bg-slate-700/50');
-            });
+            fileUploadArea.addEventListener(eventName, () => fileUploadArea.classList.add('border-sky-500', 'bg-slate-700/50'), false);
         });
-
         ['dragleave', 'drop'].forEach(eventName => {
-            fileUploadArea.addEventListener(eventName, () => {
-                fileUploadArea.classList.remove('border-sky-400', 'bg-slate-700/50');
-            });
+            fileUploadArea.addEventListener(eventName, () => fileUploadArea.classList.remove('border-sky-500', 'bg-slate-700/50'), false);
         });
-        
-        fileUploadArea.addEventListener('drop', (e) => {
-            if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-                handleFileSelect(e.dataTransfer.files[0]);
-            }
-        });
+        fileUploadArea.addEventListener('drop', (e) => handleFileSelect(e.dataTransfer.files[0]));
 
         formatBtns.forEach(btn => {
             btn.addEventListener('click', () => {
-                format = btn.dataset.format;
-                updateUI();
+                const selectedFormat = btn.dataset.format;
+                handleStateUpdate({ format: selectedFormat });
+                formatBtns.forEach(b => {
+                    b.classList.remove('bg-sky-500', 'text-white', 'shadow-lg');
+                    b.classList.add('bg-slate-700', 'text-slate-300', 'hover:bg-slate-600');
+                });
+                btn.classList.add('bg-sky-500', 'text-white', 'shadow-lg');
+                btn.classList.remove('bg-slate-700', 'text-slate-300', 'hover:bg-slate-600');
             });
         });
 
         translateCheckbox.addEventListener('change', (e) => {
-            translate = e.target.checked;
-            if (translate) {
-                targetLanguage = languageSelect.value;
-            }
-            updateUI();
+            handleStateUpdate({ translate: e.target.checked });
+            languageSelect.classList.toggle('hidden', !e.target.checked);
         });
 
-        languageSelect.addEventListener('change', (e) => {
-            targetLanguage = e.target.value;
-        });
-        
+        languageSelect.addEventListener('change', (e) => handleStateUpdate({ targetLanguage: e.target.value }));
+
         transcribeBtn.addEventListener('click', handleTranscribe);
-        copyBtn.addEventListener('click', () => handleCopy('single', originalTranscription));
-        downloadBtn.addEventListener('click', () => handleDownload(originalTranscription, 'original'));
 
-        // --- INITIAL RENDER ---
-        updateUI();
+        copyBtn.addEventListener('click', () => handleCopy(originalTranscription, copyIconContainer, copyBtnText));
+        downloadBtn.addEventListener('click', () => handleDownload(originalTranscription, format));
+        
+        resultTableBody.addEventListener('click', (e) => {
+            const button = e.target.closest('button');
+            if (!button) return;
+
+            const contentId = button.dataset.contentId;
+            const isCopy = button.id.startsWith('copy-btn');
+            const isDownload = button.id.startsWith('download-btn');
+            const contentToUse = contentId === 'original' ? originalTranscription : translatedTranscription;
+
+            if (isCopy) {
+                const iconContainer = button.querySelector(`#icon-container-copy-${contentId}`);
+                const textEl = button.querySelector(`#btn-text-copy-${contentId}`);
+                handleCopy(contentToUse, iconContainer, textEl);
+            } else if (isDownload) {
+                handleDownload(contentToUse, format);
+            }
+        });
+
+        // Initial Render
+        render();
+
     </script>
   </body>
 </html>
