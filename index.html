@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Gemini Audio Transcriber</title>
+    <title>Gemini & OpenAI Audio Transcriber</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
       body {
@@ -37,22 +37,30 @@
             <div class="w-full max-w-5xl mx-auto">
               <header class="text-center mb-8">
                 <h1 class="text-4xl sm:text-5xl font-bold text-slate-100">Audio Transcriber</h1>
-                <p class="mt-2 text-lg text-slate-400">Powered by Gemini AI</p>
+                <p class="mt-2 text-lg text-slate-400">Powered by Gemini & OpenAI</p>
               </header>
       
               <main class="space-y-8 p-6 sm:p-8 bg-slate-800/50 rounded-xl shadow-2xl border border-slate-700">
                 
                 <div class="space-y-4">
-                  <h2 class="text-xl font-semibold text-slate-200">1. Enter Your API Key</h2>
+                  <h2 class="text-xl font-semibold text-slate-200">1. Choose AI Provider</h2>
+                   <select id="api-provider-select" class="w-full p-3 bg-slate-700 border border-slate-600 text-slate-200 rounded-md focus:ring-2 focus:ring-sky-500 focus:border-sky-500">
+                      <option value="gemini" selected>Google Gemini</option>
+                      <option value="openai">OpenAI Whisper</option>
+                  </select>
+                </div>
+
+                <div class="space-y-4">
+                  <h2 class="text-xl font-semibold text-slate-200">2. Enter Your API Key</h2>
                   <input type="password" id="api-key-input" placeholder="Paste your Gemini API key here..." class="w-full p-3 bg-slate-700 border border-slate-600 text-slate-200 rounded-md focus:ring-2 focus:ring-sky-500 focus:border-sky-500" />
-                  <p class="text-xs text-slate-500">
+                  <p id="api-key-help-text" class="text-xs text-slate-500">
                       Your key is stored only in your browser. Get your key from 
                       <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:underline">Google AI Studio</a>.
                   </p>
                 </div>
 
                 <div class="space-y-4">
-                  <h2 class="text-xl font-semibold text-slate-200">2. Select AI Model</h2>
+                  <h2 class="text-xl font-semibold text-slate-200">3. Select AI Model</h2>
                   <select id="model-select" class="w-full p-3 bg-slate-700 border border-slate-600 text-slate-200 rounded-md focus:ring-2 focus:ring-sky-500 focus:border-sky-500">
                       <option value="gemini-2.5-pro" selected>Gemini 2.5 Pro (Highest Quality)</option>
                       <option value="gemini-2.5-flash">Gemini 2.5 Flash (Fastest)</option>
@@ -60,7 +68,7 @@
                 </div>
 
                 <div class="space-y-4">
-                    <h2 class="text-xl font-semibold text-slate-200">3. Provide Audio or Video Source</h2>
+                    <h2 class="text-xl font-semibold text-slate-200">4. Provide Audio or Video Source</h2>
                     <!-- Tabs -->
                     <div class="flex border-b border-slate-700">
                       <button id="tab-file" class="input-tab-btn px-4 py-2 text-sm font-medium border-b-2">Upload File</button>
@@ -77,7 +85,7 @@
                               <p class="text-sm">or click to select a file</p>
                           </div>
                       </div>
-                      <p class="mt-2 text-xs text-slate-500">Note: For local uploads, a 15MB file size limit applies due to browser constraints.</p>
+                      <p class="mt-2 text-xs text-slate-500">Note: Larger files may take longer to upload and process.</p>
                     </div>
 
                     <!-- URL Input Panel -->
@@ -91,15 +99,15 @@
                 </div>
       
                 <div class="space-y-4">
-                    <h2 class="text-xl font-semibold text-slate-200">4. Select Format</h2>
+                    <h2 class="text-xl font-semibold text-slate-200">5. Select Format</h2>
                     <div class="flex space-x-4">
                         <button id="format-btn-text" data-format="text" class="format-btn px-6 py-2 rounded-full text-sm font-medium transition-all duration-200 bg-sky-500 text-white shadow-lg">TEXT</button>
                         <button id="format-btn-srt" data-format="srt" class="format-btn px-6 py-2 rounded-full text-sm font-medium transition-all duration-200 bg-slate-700 text-slate-300 hover:bg-slate-600">SRT</button>
                     </div>
                 </div>
 
-                <div class="space-y-4">
-                    <h2 class="text-xl font-semibold text-slate-200">5. Translate (Optional)</h2>
+                <div id="translate-section" class="space-y-4">
+                    <h2 class="text-xl font-semibold text-slate-200">6. Translate (Optional)</h2>
                     <div class="flex items-center space-x-3 p-4 bg-slate-700/50 rounded-lg">
                         <input type="checkbox" id="translate-checkbox" class="h-5 w-5 rounded bg-slate-600 border-slate-500 text-sky-500 focus:ring-sky-500 cursor-pointer">
                         <label for="translate-checkbox" class="text-slate-300 cursor-pointer flex-grow">Translate transcription</label>
@@ -132,7 +140,7 @@
                 <div id="error-display" class="hidden p-4 bg-red-900/50 border border-red-700 text-red-300 rounded-md preserve-whitespace"></div>
                 
                 <div id="result-section" class="hidden space-y-4 pt-4 border-t border-slate-700">
-                   <h2 id="result-heading" class="text-xl font-semibold text-slate-200">6. Result</h2>
+                   <h2 id="result-heading" class="text-xl font-semibold text-slate-200">7. Result</h2>
                    <div id="result-loader" class="hidden flex flex-col items-center justify-center p-8 bg-slate-800 rounded-md text-slate-400">
                      <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-sky-400"></div>
                      <p class="mt-4">Processing your file... Please wait.</p>
@@ -183,7 +191,9 @@
 
         // --- DOM ELEMENTS (Grab all at once) ---
         const dom = {
+            apiProviderSelect: document.getElementById('api-provider-select'),
             apiKeyInput: document.getElementById('api-key-input'),
+            apiKeyHelpText: document.getElementById('api-key-help-text'),
             modelSelect: document.getElementById('model-select'),
             tabFile: document.getElementById('tab-file'),
             tabUrl: document.getElementById('tab-url'),
@@ -194,6 +204,7 @@
             fileInput: document.getElementById('file-input'),
             fileNameDisplay: document.getElementById('file-name-display'),
             formatBtns: document.querySelectorAll('.format-btn'),
+            translateSection: document.getElementById('translate-section'),
             translateCheckbox: document.getElementById('translate-checkbox'),
             languageSelect: document.getElementById('language-select'),
             transcribeBtn: document.getElementById('transcribe-btn'),
@@ -216,8 +227,22 @@
             footerYear: document.querySelector('footer p'),
         };
 
+        // --- APP CONFIG ---
+        const config = {
+            models: {
+                gemini: [
+                    { value: 'gemini-2.5-pro', text: 'Gemini 2.5 Pro (Highest Quality)' },
+                    { value: 'gemini-2.5-flash', text: 'Gemini 2.5 Flash (Fastest)' },
+                ],
+                openai: [
+                    { value: 'whisper-1', text: 'Whisper-1 (High Quality & Fast)' },
+                ],
+            }
+        }
+
         // --- STATE MANAGEMENT ---
         const state = {
+            apiProvider: 'gemini',
             apiKey: '',
             model: 'gemini-2.5-pro',
             audioFile: null,
@@ -241,8 +266,8 @@
         const copyIconSVG = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mr-2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 01-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 0 011.5 .124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 00-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 01-1.125-1.125v-9.25m9.375 0V9.375c0 .621-.504 1.125-1.125 1.125h-1.5" /></svg>`;
         const checkIconSVG = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mr-2 text-green-400"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>`;
 
-        // --- GEMINI SERVICE LOGIC ---
-        const getPrompt = (format, shouldTranslate, lang) => {
+        // --- API SERVICE LOGIC ---
+        const getGeminiPrompt = (format, shouldTranslate, lang) => {
             let basePrompt;
             let formatInstructions;
 
@@ -250,8 +275,9 @@
                 formatInstructions = `
 IMPORTANT INSTRUCTIONS:
 1.  **Focus on Speech:** Prioritize transcribing human speech. If the audio is noisy, do your best to isolate and transcribe only the spoken words, ignoring background noise.
-2.  **Output Format:** Provide the transcription in SRT (SubRip Text) format.
-3.  **Granular Timestamps:** This is critical. Create a new subtitle entry (with a new sequential number, timestamp, and text line) for every short phrase or clause. A good rule of thumb is to create a new entry after every comma or a natural pause in speech. Do not group multiple sentences or long clauses into a single subtitle block.
+2.  **Output Format:** Provide the transcription in SRT (SubRip Text) format. The structure should be: subtitle index, timestamp, and text.
+3.  **Timestamp Format:** The timestamp format is CRITICAL and MUST be exactly \`HH:MM:SS,ms --> HH:MM:SS,ms\` (hours, minutes, seconds, comma, milliseconds). For example: \`00:01:23,456 --> 00:01:25,789\`.
+4.  **Granular Timestamps:** Create a new subtitle entry (with a new sequential number, timestamp, and text line) for every short phrase or clause. A good rule of thumb is to create a new entry after every comma or a natural pause in speech. Do not group multiple sentences or long clauses into a single subtitle block.
 Ensure the final output strictly adheres to this SRT format. Do not include any extra explanations, comments, or introductory text.`;
             } else { // 'text' format
                 formatInstructions = 'Prioritize transcribing human speech and ignore background noise as much as possible. Provide only the transcribed text, without any additional comments or explanations.';
@@ -281,8 +307,8 @@ ${formatInstructions}`;
             return basePrompt;
         };
 
-        const generateTranscription = async (mediaPart, transcriptionFormat, shouldTranslate, lang) => {
-             const prompt = getPrompt(transcriptionFormat, shouldTranslate, lang);
+        const generateTranscriptionGemini = async (mediaPart, transcriptionFormat, shouldTranslate, lang) => {
+             const prompt = getGeminiPrompt(transcriptionFormat, shouldTranslate, lang);
  
              const ai = new GoogleGenAI({ apiKey: state.apiKey });
              const response = await ai.models.generateContent({
@@ -290,6 +316,35 @@ ${formatInstructions}`;
                  contents: { parts: [{ text: prompt }, mediaPart] },
              });
              return response.text;
+        };
+
+        const generateTranscriptionOpenAI = async (file, model, format) => {
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('model', model);
+            // Whisper API uses 'json' for plain text output, which contains a 'text' field.
+            const responseFormat = format === 'text' ? 'json' : 'srt';
+            formData.append('response_format', responseFormat);
+
+            const response = await fetch('https://api.openai.com/v1/audio/transcriptions', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${state.apiKey}`
+                },
+                body: formData
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error.message || 'An unknown error occurred with the OpenAI API.');
+            }
+
+            if (responseFormat === 'json') {
+                const result = await response.json();
+                return result.text;
+            } else {
+                return await response.text();
+            }
         };
 
         // --- UI HELPER & RENDER FUNCTIONS ---
@@ -344,7 +399,7 @@ ${formatInstructions}`;
 
             // Loading spinners
             dom.transcribeSpinner.classList.toggle('hidden', state.isLoading);
-            dom.transcribeBtnContent.classList.toggle('hidden', state.isLoading);
+            dom.transcribeBtnContent.classList.toggle('hidden', !state.isLoading);
 
             // Error display
             dom.errorDisplay.classList.toggle('hidden', !state.errorMessage);
@@ -353,20 +408,36 @@ ${formatInstructions}`;
                 dom.resultSection.classList.add('hidden');
             }
 
+            // API Provider specific UI changes
+            if (state.apiProvider === 'gemini') {
+                dom.apiKeyInput.placeholder = 'Paste your Gemini API key here...';
+                dom.apiKeyHelpText.innerHTML = `Your key is stored only in your browser. Get your key from <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:underline">Google AI Studio</a>.`;
+                dom.translateSection.classList.remove('hidden');
+                dom.tabUrl.classList.remove('hidden');
+            } else { // openai
+                dom.apiKeyInput.placeholder = 'Paste your OpenAI API key here...';
+                dom.apiKeyHelpText.innerHTML = `Your key is stored only in your browser. Get your key from the <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:underline">OpenAI Platform</a>.`;
+                dom.translateSection.classList.add('hidden');
+                dom.tabUrl.classList.add('hidden');
+                 if (state.inputType === 'url') {
+                   setState({ inputType: 'file' });
+                }
+            }
+
             // Result section visibility
             if (state.originalTranscription) {
                 dom.resultSection.classList.remove('hidden');
                 dom.resultLoader.classList.add('hidden');
                 dom.resultDisplay.classList.remove('hidden');
-                if (state.translate) {
+                if (state.translate && state.apiProvider === 'gemini') {
                     dom.singleResultContainer.classList.add('hidden');
                     dom.tableResultContainer.classList.remove('hidden');
-                    dom.resultHeading.textContent = `6. Transcription & Translation Result`;
+                    dom.resultHeading.textContent = `7. Transcription & Translation Result`;
                     populateTable();
                 } else {
                     dom.singleResultContainer.classList.remove('hidden');
                     dom.tableResultContainer.classList.add('hidden');
-                    dom.resultHeading.textContent = `6. Transcription Result`;
+                    dom.resultHeading.textContent = `7. Transcription Result`;
                     dom.transcriptionOutput.value = state.originalTranscription;
                 }
             } else if (!state.isLoading) {
@@ -410,11 +481,6 @@ ${formatInstructions}`;
         const handleFileSelect = (file) => {
             if (!file) return;
 
-            if (file.size > 15 * 1024 * 1024) {
-                setState({ errorMessage: 'File size exceeds 15MB. Please choose a smaller file.' });
-                return;
-            }
-            
             setState({ audioFile: file, sourceUrl: '', errorMessage: '', originalTranscription: '' });
             dom.fileNameDisplay.textContent = `Selected: ${file.name}`;
             dom.fileNameDisplay.classList.remove('hidden');
@@ -457,29 +523,37 @@ ${formatInstructions}`;
             dom.resultDisplay.classList.add('hidden');
 
             try {
-                let mediaPart;
-                if (state.inputType === 'file' && state.audioFile) {
-                    mediaPart = await fileToGenerativePart(state.audioFile);
-                } else if (state.inputType === 'url' && state.sourceUrl) {
-                    const urlPattern = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/;
-                    if (!urlPattern.test(state.sourceUrl)) {
-                         throw new Error('Please enter a valid URL.');
+                let responseText;
+                if (state.apiProvider === 'gemini') {
+                    let mediaPart;
+                    if (state.inputType === 'file' && state.audioFile) {
+                        mediaPart = await fileToGenerativePart(state.audioFile);
+                    } else if (state.inputType === 'url' && state.sourceUrl) {
+                        const urlPattern = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/;
+                        if (!urlPattern.test(state.sourceUrl)) {
+                            throw new Error('Please enter a valid URL.');
+                        }
+                        const extension = state.sourceUrl.split('.').pop().toLowerCase();
+                        const mimeTypeMap = {
+                            'mp3': 'audio/mpeg', 'wav': 'audio/wav', 'ogg': 'audio/ogg', 'm4a': 'audio/mp4',
+                            'mp4': 'video/mp4', 'webm': 'video/webm', 'mov': 'video/quicktime'
+                        };
+                        const mimeType = mimeTypeMap[extension] || 'application/octet-stream';
+
+                        mediaPart = { fileData: { mimeType: mimeType, uri: state.sourceUrl } };
+                    } else {
+                        throw new Error('Please provide an audio/video source.');
                     }
-                    const extension = state.sourceUrl.split('.').pop().toLowerCase();
-                    const mimeTypeMap = {
-                        'mp3': 'audio/mpeg', 'wav': 'audio/wav', 'ogg': 'audio/ogg', 'm4a': 'audio/mp4',
-                        'mp4': 'video/mp4', 'webm': 'video/webm', 'mov': 'video/quicktime'
-                    };
-                    const mimeType = mimeTypeMap[extension] || 'application/octet-stream';
-
-                    mediaPart = { fileData: { mimeType: mimeType, uri: state.sourceUrl } };
-                } else {
-                    throw new Error('Please provide an audio/video source.');
+                    responseText = await generateTranscriptionGemini(mediaPart, state.format, state.translate, state.targetLanguage);
+                } else { // openai
+                    if (!state.audioFile) {
+                         throw new Error('Please select a file to transcribe.');
+                    }
+                    responseText = await generateTranscriptionOpenAI(state.audioFile, state.model, state.format);
                 }
-                
-                const responseText = await generateTranscription(mediaPart, state.format, state.translate, state.targetLanguage);
 
-                if (state.translate) {
+
+                if (state.translate && state.apiProvider === 'gemini') {
                     const parts = responseText.split('---TRANSLATION_SEPARATOR---');
                     if (parts.length === 2) {
                         setState({
@@ -495,7 +569,7 @@ ${formatInstructions}`;
             } catch (e) {
                 console.error(e);
                 let displayError = e.message;
-                if (displayError.includes('API key not valid')) {
+                 if (displayError.includes('API key not valid') || (e.message && e.message.toLowerCase().includes('incorrect api key'))) {
                     displayError = 'Your API Key is not valid. Please check it and try again.';
                 } else if (displayError.includes('Unsupported file uri')) {
                     displayError = `The provided URL could not be accessed. This might be because it's a private link, temporary, or on a server that blocks requests. Please try downloading the file and using the "Upload File" tab.`;
@@ -509,6 +583,30 @@ ${formatInstructions}`;
         };
 
         // --- EVENT LISTENERS ---
+        dom.apiProviderSelect.addEventListener('change', (e) => {
+            const provider = e.target.value;
+            const defaultModel = config.models[provider][0].value;
+            dom.modelSelect.innerHTML = config.models[provider]
+                .map(model => `<option value="${model.value}">${model.text}</option>`)
+                .join('');
+            
+            setState({
+                apiProvider: provider,
+                model: defaultModel,
+                apiKey: '',
+                audioFile: null,
+                sourceUrl: '',
+                originalTranscription: '',
+                translatedTranscription: '',
+                errorMessage: '',
+                inputType: 'file',
+            });
+            dom.apiKeyInput.value = '';
+            dom.fileInput.value = '';
+            dom.urlInput.value = '';
+            dom.fileNameDisplay.classList.add('hidden');
+        });
+
         dom.apiKeyInput.addEventListener('input', (e) => {
           setState({ apiKey: e.target.value.trim() });
         });
