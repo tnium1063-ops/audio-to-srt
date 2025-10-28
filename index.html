@@ -37,12 +37,30 @@
             <div class="w-full max-w-5xl mx-auto">
               <header class="text-center mb-8">
                 <h1 class="text-4xl sm:text-5xl font-bold text-slate-100">Audio Transcriber</h1>
-                <p class="mt-2 text-lg text-slate-400">Powered by Gemini 2.5 Pro</p>
+                <p class="mt-2 text-lg text-slate-400">Powered by Gemini AI</p>
               </header>
       
               <main class="space-y-8 p-6 sm:p-8 bg-slate-800/50 rounded-xl shadow-2xl border border-slate-700">
+                
                 <div class="space-y-4">
-                    <h2 class="text-xl font-semibold text-slate-200">1. Provide Audio or Video Source</h2>
+                  <h2 class="text-xl font-semibold text-slate-200">1. Enter Your API Key</h2>
+                  <input type="password" id="api-key-input" placeholder="Paste your Gemini API key here..." class="w-full p-3 bg-slate-700 border border-slate-600 text-slate-200 rounded-md focus:ring-2 focus:ring-sky-500 focus:border-sky-500" />
+                  <p class="text-xs text-slate-500">
+                      Your key is stored only in your browser. Get your key from 
+                      <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:underline">Google AI Studio</a>.
+                  </p>
+                </div>
+
+                <div class="space-y-4">
+                  <h2 class="text-xl font-semibold text-slate-200">2. Select AI Model</h2>
+                  <select id="model-select" class="w-full p-3 bg-slate-700 border border-slate-600 text-slate-200 rounded-md focus:ring-2 focus:ring-sky-500 focus:border-sky-500">
+                      <option value="gemini-2.5-pro" selected>Gemini 2.5 Pro (Highest Quality)</option>
+                      <option value="gemini-2.5-flash">Gemini 2.5 Flash (Fastest)</option>
+                  </select>
+                </div>
+
+                <div class="space-y-4">
+                    <h2 class="text-xl font-semibold text-slate-200">3. Provide Audio or Video Source</h2>
                     <!-- Tabs -->
                     <div class="flex border-b border-slate-700">
                       <button id="tab-file" class="input-tab-btn px-4 py-2 text-sm font-medium border-b-2">Upload File</button>
@@ -73,7 +91,7 @@
                 </div>
       
                 <div class="space-y-4">
-                    <h2 class="text-xl font-semibold text-slate-200">2. Select Format</h2>
+                    <h2 class="text-xl font-semibold text-slate-200">4. Select Format</h2>
                     <div class="flex space-x-4">
                         <button id="format-btn-text" data-format="text" class="format-btn px-6 py-2 rounded-full text-sm font-medium transition-all duration-200 bg-sky-500 text-white shadow-lg">TEXT</button>
                         <button id="format-btn-srt" data-format="srt" class="format-btn px-6 py-2 rounded-full text-sm font-medium transition-all duration-200 bg-slate-700 text-slate-300 hover:bg-slate-600">SRT</button>
@@ -81,7 +99,7 @@
                 </div>
 
                 <div class="space-y-4">
-                    <h2 class="text-xl font-semibold text-slate-200">3. Translate (Optional)</h2>
+                    <h2 class="text-xl font-semibold text-slate-200">5. Translate (Optional)</h2>
                     <div class="flex items-center space-x-3 p-4 bg-slate-700/50 rounded-lg">
                         <input type="checkbox" id="translate-checkbox" class="h-5 w-5 rounded bg-slate-600 border-slate-500 text-sky-500 focus:ring-sky-500 cursor-pointer">
                         <label for="translate-checkbox" class="text-slate-300 cursor-pointer flex-grow">Translate transcription</label>
@@ -114,7 +132,7 @@
                 <div id="error-display" class="hidden p-4 bg-red-900/50 border border-red-700 text-red-300 rounded-md preserve-whitespace"></div>
                 
                 <div id="result-section" class="hidden space-y-4 pt-4 border-t border-slate-700">
-                   <h2 id="result-heading" class="text-xl font-semibold text-slate-200">4. Result</h2>
+                   <h2 id="result-heading" class="text-xl font-semibold text-slate-200">6. Result</h2>
                    <div id="result-loader" class="hidden flex flex-col items-center justify-center p-8 bg-slate-800 rounded-md text-slate-400">
                      <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-sky-400"></div>
                      <p class="mt-4">Processing your file... Please wait.</p>
@@ -165,6 +183,8 @@
 
         // --- DOM ELEMENTS (Grab all at once) ---
         const dom = {
+            apiKeyInput: document.getElementById('api-key-input'),
+            modelSelect: document.getElementById('model-select'),
             tabFile: document.getElementById('tab-file'),
             tabUrl: document.getElementById('tab-url'),
             fileUploadPanel: document.getElementById('file-upload-panel'),
@@ -198,7 +218,8 @@
 
         // --- STATE MANAGEMENT ---
         const state = {
-            apiKey: 'AIzaSyD60wzbto9FLd-Fgv2mMz2FSsifRRKbTdQ', // Hardcoded for testing
+            apiKey: '',
+            model: 'gemini-2.5-pro',
             audioFile: null,
             sourceUrl: '',
             originalTranscription: '',
@@ -265,7 +286,7 @@ ${formatInstructions}`;
  
              const ai = new GoogleGenAI({ apiKey: state.apiKey });
              const response = await ai.models.generateContent({
-                 model: 'gemini-2.5-pro',
+                 model: state.model,
                  contents: { parts: [{ text: prompt }, mediaPart] },
              });
              return response.text;
@@ -317,7 +338,7 @@ ${formatInstructions}`;
         
         const render = () => {
             // Button states
-            dom.transcribeBtn.disabled = state.isLoading || (!state.audioFile && !state.sourceUrl);
+            dom.transcribeBtn.disabled = state.isLoading || (!state.audioFile && !state.sourceUrl) || !state.apiKey;
             dom.copyBtn.disabled = !state.originalTranscription || state.isLoading;
             dom.downloadBtn.disabled = !state.originalTranscription || state.isLoading;
 
@@ -340,12 +361,12 @@ ${formatInstructions}`;
                 if (state.translate) {
                     dom.singleResultContainer.classList.add('hidden');
                     dom.tableResultContainer.classList.remove('hidden');
-                    dom.resultHeading.textContent = `4. Transcription & Translation Result`;
+                    dom.resultHeading.textContent = `6. Transcription & Translation Result`;
                     populateTable();
                 } else {
                     dom.singleResultContainer.classList.remove('hidden');
                     dom.tableResultContainer.classList.add('hidden');
-                    dom.resultHeading.textContent = `4. Transcription Result`;
+                    dom.resultHeading.textContent = `6. Transcription Result`;
                     dom.transcriptionOutput.value = state.originalTranscription;
                 }
             } else if (!state.isLoading) {
@@ -488,6 +509,12 @@ ${formatInstructions}`;
         };
 
         // --- EVENT LISTENERS ---
+        dom.apiKeyInput.addEventListener('input', (e) => {
+          setState({ apiKey: e.target.value.trim() });
+        });
+        
+        dom.modelSelect.addEventListener('change', (e) => setState({ model: e.target.value }));
+
         dom.urlInput.addEventListener('input', (e) => {
           setState({ sourceUrl: e.target.value.trim(), audioFile: null, originalTranscription: '' });
           if(e.target.value.trim()){
