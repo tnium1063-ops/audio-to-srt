@@ -1,0 +1,5 @@
+{
+  "name": "Audio Transcriber",
+  "description": "An elegant web application that transcribes audio files into text or SRT format using the Gemini API. Users can upload an audio file, choose their desired output format, and easily copy or download the generated transcription.",
+  "requestFramePermissions": []
+}
