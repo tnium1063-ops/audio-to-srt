@@ -37,7 +37,7 @@
             <div class="w-full max-w-5xl mx-auto">
               <header class="text-center mb-8">
                 <h1 class="text-4xl sm:text-5xl font-bold text-slate-100">Audio Transcriber</h1>
-                <p class="mt-2 text-lg text-slate-400">Powered by Gemini, OpenAI & Bytez</p>
+                <p class="mt-2 text-lg text-slate-400">Powered by Gemini, OpenAI, Deepgram & Bytez</p>
               </header>
       
               <main class="space-y-8 p-6 sm:p-8 bg-slate-800/50 rounded-xl shadow-2xl border border-slate-700">
@@ -48,6 +48,7 @@
                       <option value="bytez" selected>Bytez</option>
                       <option value="gemini">Google Gemini</option>
                       <option value="openai">OpenAI Whisper</option>
+                      <option value="deepgram">Deepgram</option>
                   </select>
                 </div>
 
@@ -239,6 +240,10 @@
                 bytez: [
                     { value: 'whisper-1', text: 'Whisper-1 (via Bytez)' },
                 ],
+                deepgram: [
+                    { value: 'nova-2', text: 'Nova-2 (Best Quality & Speed)' },
+                    { value: 'whisper-large', text: 'Whisper Large' },
+                ],
             }
         }
 
@@ -267,6 +272,28 @@
         // --- ICONS (SVG STRINGS) ---
         const copyIconSVG = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mr-2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 01-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 0 011.5 .124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 00-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 01-1.125-1.125v-9.25m9.375 0V9.375c0 .621-.504 1.125-1.125 1.125h-1.5" /></svg>`;
         const checkIconSVG = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mr-2 text-green-400"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>`;
+
+        // --- UTILITY FUNCTIONS ---
+        const formatTimestamp = (seconds) => {
+            const hours = Math.floor(seconds / 3600);
+            const minutes = Math.floor((seconds % 3600) / 60);
+            const secs = Math.floor(seconds % 60);
+            const ms = Math.floor((seconds - Math.floor(seconds)) * 1000);
+
+            const pad = (num) => num.toString().padStart(2, '0');
+            const padMs = (num) => num.toString().padStart(3, '0');
+
+            return `${pad(hours)}:${pad(minutes)}:${pad(secs)},${padMs(ms)}`;
+        };
+
+        const jsonToSrt_deepgram = (utterances) => {
+            return utterances.map((utterance, index) => {
+                const start = formatTimestamp(utterance.start);
+                const end = formatTimestamp(utterance.end);
+                const text = utterance.transcript;
+                return `${index + 1}\n${start} --> ${end}\n${text}\n`;
+            }).join('\n');
+        };
 
         // --- API SERVICE LOGIC ---
         const getGeminiPrompt = (format, shouldTranslate, lang) => {
@@ -348,6 +375,36 @@ ${formatInstructions}`;
             }
         };
 
+        const generateTranscriptionDeepgram = async (file, model, format) => {
+            const queryParams = `?model=${model}&punctuate=true${format === 'srt' ? '&utterances=true' : ''}`;
+            const apiUrl = `https://api.deepgram.com/v1/listen${queryParams}`;
+
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Token ${state.apiKey}`,
+                    'Content-Type': file.type,
+                },
+                body: file
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.reason || errorData.err_msg || `An unknown error occurred with the Deepgram API.`);
+            }
+
+            const result = await response.json();
+
+            if (format === 'srt') {
+                if (!result.results.utterances) {
+                    throw new Error('Could not get SRT data. The API response did not contain utterances.');
+                }
+                return jsonToSrt_deepgram(result.results.utterances);
+            } else { // text
+                return result.results.channels[0].alternatives[0].transcript;
+            }
+        };
+
 
         // --- UI HELPER & RENDER FUNCTIONS ---
         const createActionButton = (type, id, text, content) => {
@@ -403,8 +460,8 @@ ${formatInstructions}`;
             dom.downloadBtn.disabled = !state.originalTranscription || state.isLoading;
 
             // Loading spinners
-            dom.transcribeSpinner.classList.toggle('hidden', state.isLoading);
-            dom.transcribeBtnContent.classList.toggle('hidden', !state.isLoading);
+            dom.transcribeSpinner.classList.toggle('hidden', !state.isLoading);
+            dom.transcribeBtnContent.classList.toggle('hidden', state.isLoading);
 
             // Error display
             dom.errorDisplay.classList.toggle('hidden', !state.errorMessage);
@@ -419,6 +476,14 @@ ${formatInstructions}`;
                 dom.apiKeyHelpText.innerHTML = `Your key is stored only in your browser. Get your key from <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:underline">Google AI Studio</a>.`;
                 dom.translateSection.classList.remove('hidden');
                 dom.tabUrl.classList.remove('hidden');
+            } else if (state.apiProvider === 'deepgram') {
+                dom.apiKeyInput.placeholder = 'Paste your Deepgram API key here...';
+                dom.apiKeyHelpText.innerHTML = `Your key is stored only in your browser. Get your key from <a href="https://console.deepgram.com/" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:underline">Deepgram Console</a>.`;
+                dom.translateSection.classList.add('hidden');
+                dom.tabUrl.classList.add('hidden');
+                 if (state.inputType === 'url') {
+                   setState({ inputType: 'file' });
+                }
             } else { // openai or bytez
                 const isBytez = state.apiProvider === 'bytez';
                 const providerName = isBytez ? 'Bytez' : 'OpenAI';
@@ -555,7 +620,13 @@ ${formatInstructions}`;
                         throw new Error('Please provide an audio/video source.');
                     }
                     responseText = await generateTranscriptionGemini(mediaPart, state.format, state.translate, state.targetLanguage);
-                } else { // openai or bytez
+                } else if (state.apiProvider === 'deepgram') {
+                     if (!state.audioFile) {
+                         throw new Error('Please select a file to transcribe.');
+                    }
+                    responseText = await generateTranscriptionDeepgram(state.audioFile, state.model, state.format);
+                }
+                else { // openai or bytez
                     if (!state.audioFile) {
                          throw new Error('Please select a file to transcribe.');
                     }
