@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Gemini & OpenAI Audio Transcriber</title>
+    <title>Gemini Audio Transcriber</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
       body {
@@ -37,23 +37,13 @@
             <div class="w-full max-w-5xl mx-auto">
               <header class="text-center mb-8">
                 <h1 class="text-4xl sm:text-5xl font-bold text-slate-100">Audio Transcriber</h1>
-                <p class="mt-2 text-lg text-slate-400">Powered by Gemini, OpenAI, Deepgram & Bytez</p>
+                <p class="mt-2 text-lg text-slate-400">Powered by Gemini</p>
               </header>
       
               <main class="space-y-8 p-6 sm:p-8 bg-slate-800/50 rounded-xl shadow-2xl border border-slate-700">
                 
                 <div class="space-y-4">
-                  <h2 class="text-xl font-semibold text-slate-200">1. Choose AI Provider</h2>
-                   <select id="api-provider-select" class="w-full p-3 bg-slate-700 border border-slate-600 text-slate-200 rounded-md focus:ring-2 focus:ring-sky-500 focus:border-sky-500">
-                      <option value="bytez" selected>Bytez</option>
-                      <option value="gemini">Google Gemini</option>
-                      <option value="openai">OpenAI Whisper</option>
-                      <option value="deepgram">Deepgram</option>
-                  </select>
-                </div>
-
-                <div class="space-y-4">
-                  <h2 class="text-xl font-semibold text-slate-200">2. Enter Your API Key</h2>
+                  <h2 class="text-xl font-semibold text-slate-200">1. Enter Your Gemini API Key</h2>
                   <input type="password" id="api-key-input" placeholder="Paste your API key here..." class="w-full p-3 bg-slate-700 border border-slate-600 text-slate-200 rounded-md focus:ring-2 focus:ring-sky-500 focus:border-sky-500" />
                   <p id="api-key-help-text" class="text-xs text-slate-500">
                       Your key is stored only in your browser.
@@ -61,20 +51,15 @@
                 </div>
 
                 <div class="space-y-4">
-                  <h2 class="text-xl font-semibold text-slate-200">3. Select AI Model</h2>
+                  <h2 class="text-xl font-semibold text-slate-200">2. Select AI Model</h2>
                   <select id="model-select" class="w-full p-3 bg-slate-700 border border-slate-600 text-slate-200 rounded-md focus:ring-2 focus:ring-sky-500 focus:border-sky-500">
                       <!-- Models are populated by JS -->
                   </select>
                 </div>
 
                 <div class="space-y-4">
-                    <h2 class="text-xl font-semibold text-slate-200">4. Provide Audio or Video Source</h2>
-                    <!-- Tabs -->
-                    <div class="flex border-b border-slate-700">
-                      <button id="tab-file" class="input-tab-btn px-4 py-2 text-sm font-medium border-b-2">Upload File</button>
-                      <button id="tab-url" class="input-tab-btn px-4 py-2 text-sm font-medium border-b-2">From URL</button>
-                    </div>
-
+                    <h2 class="text-xl font-semibold text-slate-200">3. Provide Audio or Video Source</h2>
+                    
                     <!-- File Upload Panel -->
                     <div id="file-upload-panel">
                       <div id="file-upload-area" tabindex="0" role="button" aria-label="Upload audio or video file" class="relative w-full border-2 border-dashed rounded-lg p-8 text-center transition-colors duration-300 border-slate-600 hover:border-sky-500 cursor-pointer">
@@ -88,18 +73,11 @@
                       <p class="mt-2 text-xs text-slate-500">Note: Larger files may take longer to upload and process.</p>
                     </div>
 
-                    <!-- URL Input Panel -->
-                    <div id="url-upload-panel" class="hidden">
-                      <div class="flex items-center space-x-2">
-                        <input type="url" id="url-input" placeholder="Enter a direct audio or video URL..." class="w-full p-3 bg-slate-700 border border-slate-600 text-slate-200 rounded-md focus:ring-2 focus:ring-sky-500 focus:border-sky-500">
-                      </div>
-                      <p class="mt-2 text-xs text-slate-500">Note: URL must be publicly accessible. Processing large files may take several minutes.</p>
-                    </div>
                     <p id="file-name-display" class="text-lg text-green-400 hidden truncate p-2 bg-slate-700/50 rounded-md"></p>
                 </div>
       
                 <div class="space-y-4">
-                    <h2 class="text-xl font-semibold text-slate-200">5. Select Format</h2>
+                    <h2 class="text-xl font-semibold text-slate-200">4. Select Format</h2>
                     <div class="flex space-x-4">
                         <button id="format-btn-text" data-format="text" class="format-btn px-6 py-2 rounded-full text-sm font-medium transition-all duration-200 bg-sky-500 text-white shadow-lg">TEXT</button>
                         <button id="format-btn-srt" data-format="srt" class="format-btn px-6 py-2 rounded-full text-sm font-medium transition-all duration-200 bg-slate-700 text-slate-300 hover:bg-slate-600">SRT</button>
@@ -107,7 +85,7 @@
                 </div>
 
                 <div id="translate-section" class="space-y-4">
-                    <h2 class="text-xl font-semibold text-slate-200">6. Translate (Optional)</h2>
+                    <h2 class="text-xl font-semibold text-slate-200">5. Translate (Optional)</h2>
                     <div class="flex items-center space-x-3 p-4 bg-slate-700/50 rounded-lg">
                         <input type="checkbox" id="translate-checkbox" class="h-5 w-5 rounded bg-slate-600 border-slate-500 text-sky-500 focus:ring-sky-500 cursor-pointer">
                         <label for="translate-checkbox" class="text-slate-300 cursor-pointer flex-grow">Translate transcription</label>
@@ -140,7 +118,7 @@
                 <div id="error-display" class="hidden p-4 bg-red-900/50 border border-red-700 text-red-300 rounded-md preserve-whitespace"></div>
                 
                 <div id="result-section" class="hidden space-y-4 pt-4 border-t border-slate-700">
-                   <h2 id="result-heading" class="text-xl font-semibold text-slate-200">7. Result</h2>
+                   <h2 id="result-heading" class="text-xl font-semibold text-slate-200">6. Result</h2>
                    <div id="result-loader" class="hidden flex flex-col items-center justify-center p-8 bg-slate-800 rounded-md text-slate-400">
                      <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-sky-400"></div>
                      <p class="mt-4">Processing your file... Please wait.</p>
@@ -191,15 +169,9 @@
 
         // --- DOM ELEMENTS (Grab all at once) ---
         const dom = {
-            apiProviderSelect: document.getElementById('api-provider-select'),
             apiKeyInput: document.getElementById('api-key-input'),
             apiKeyHelpText: document.getElementById('api-key-help-text'),
             modelSelect: document.getElementById('model-select'),
-            tabFile: document.getElementById('tab-file'),
-            tabUrl: document.getElementById('tab-url'),
-            fileUploadPanel: document.getElementById('file-upload-panel'),
-            urlUploadPanel: document.getElementById('url-upload-panel'),
-            urlInput: document.getElementById('url-input'),
             fileUploadArea: document.getElementById('file-upload-area'),
             fileInput: document.getElementById('file-input'),
             fileNameDisplay: document.getElementById('file-name-display'),
@@ -233,27 +205,16 @@
                 gemini: [
                     { value: 'gemini-2.5-pro', text: 'Gemini 2.5 Pro (Highest Quality)' },
                     { value: 'gemini-2.5-flash', text: 'Gemini 2.5 Flash (Fastest)' },
-                ],
-                openai: [
-                    { value: 'whisper-1', text: 'Whisper-1 (High Quality & Fast)' },
-                ],
-                bytez: [
-                    { value: 'whisper-1', text: 'Whisper-1 (via Bytez)' },
-                ],
-                deepgram: [
-                    { value: 'nova-2', text: 'Nova-2 (Best Quality & Speed)' },
-                    { value: 'whisper-large', text: 'Whisper Large' },
+                    { value: 'gemini-flash-lite-latest', text: 'Gemini Flash Lite (Lightweight)' },
                 ],
             }
         }
 
         // --- STATE MANAGEMENT ---
         const state = {
-            apiProvider: 'bytez',
-            apiKey: 'd2f1679b8da24c5ad3d4320d98f72355',
-            model: 'whisper-1',
+            apiKey: '',
+            model: 'gemini-2.5-pro',
             audioFile: null,
-            sourceUrl: '',
             originalTranscription: '',
             translatedTranscription: '',
             isLoading: false,
@@ -261,7 +222,6 @@
             format: 'text',
             translate: false,
             targetLanguage: 'English',
-            inputType: 'file', // 'file' or 'url'
         };
 
         const setState = (updates) => {
@@ -273,41 +233,90 @@
         const copyIconSVG = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mr-2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 01-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 0 011.5 .124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 00-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 01-1.125-1.125v-9.25m9.375 0V9.375c0 .621-.504 1.125-1.125 1.125h-1.5" /></svg>`;
         const checkIconSVG = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mr-2 text-green-400"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>`;
 
-        // --- UTILITY FUNCTIONS ---
-        const formatTimestamp = (seconds) => {
-            const hours = Math.floor(seconds / 3600);
-            const minutes = Math.floor((seconds % 3600) / 60);
-            const secs = Math.floor(seconds % 60);
-            const ms = Math.floor((seconds - Math.floor(seconds)) * 1000);
-
-            const pad = (num) => num.toString().padStart(2, '0');
-            const padMs = (num) => num.toString().padStart(3, '0');
-
-            return `${pad(hours)}:${pad(minutes)}:${pad(secs)},${padMs(ms)}`;
-        };
-
-        const jsonToSrt_deepgram = (utterances) => {
-            return utterances.map((utterance, index) => {
-                const start = formatTimestamp(utterance.start);
-                const end = formatTimestamp(utterance.end);
-                const text = utterance.transcript;
-                return `${index + 1}\n${start} --> ${end}\n${text}\n`;
-            }).join('\n');
-        };
-
         // --- API SERVICE LOGIC ---
-        const getGeminiPrompt = (format, shouldTranslate, lang) => {
+        const getGeminiPrompt = (format, shouldTranslate, lang, model) => {
             let basePrompt;
             let formatInstructions;
 
             if (format === 'srt') {
-                formatInstructions = `
-IMPORTANT INSTRUCTIONS:
-1.  **Focus on Speech:** Prioritize transcribing human speech. If the audio is noisy, do your best to isolate and transcribe only the spoken words, ignoring background noise.
-2.  **Output Format:** Provide the transcription in SRT (SubRip Text) format. The structure should be: subtitle index, timestamp, and text.
-3.  **Timestamp Format:** The timestamp format is CRITICAL and MUST be exactly \`HH:MM:SS,ms --> HH:MM:SS,ms\` (hours, minutes, seconds, comma, milliseconds). For example: \`00:01:23,456 --> 00:01:25,789\`.
-4.  **Granular Timestamps:** Create a new subtitle entry (with a new sequential number, timestamp, and text line) for every short phrase or clause. A good rule of thumb is to create a new entry after every comma or a natural pause in speech. Do not group multiple sentences or long clauses into a single subtitle block.
-Ensure the final output strictly adheres to this SRT format. Do not include any extra explanations, comments, or introductory text.`;
+                if (model === 'gemini-flash-lite-latest' || model === 'gemini-2.5-flash') {
+                    formatInstructions = `
+IMPORTANT INSTRUCTIONS FOR SRT FORMAT (STRICT FOR LITE/FLASH MODELS):
+
+You MUST produce a valid SRT (SubRip Text) file. Each subtitle block MUST follow this exact structure:
+
+[INDEX]
+[START_TIME] --> [END_TIME]
+[SUBTITLE_TEXT]
+
+(A blank line separates this block from the next one)
+
+**CRITICAL RULES FOR LITE/FLASH MODELS:**
+1.  **EXTREMELY SHORT LINES (ABSOLUTE RULE):** This is the most important rule. You MUST break down all sentences into very short, readable chunks for subtitles.
+    *   **NEVER** let a single subtitle text line exceed 40 characters.
+    *   **ALWAYS** create a new subtitle entry immediately after a comma (",").
+    *   **ALWAYS** create a new entry at natural speaking pauses.
+    *   It is much better to have many short lines than one long line. **DO NOT** combine multiple clauses or long phrases into a single subtitle entry.
+2.  **INDEX:** A sequential number starting from 1.
+3.  **TIMESTAMP (ABSOLUTE RULE):** The timestamp format is NON-NEGOTIABLE. You MUST strictly follow the \`HH:MM:SS,ms\` format.
+    -   The \`HH:\` (hours) part MUST ALWAYS be present, even if it is \`00\`.
+    -   All components (Hours, Minutes, Seconds) MUST ALWAYS be present and padded with a leading zero if they are a single digit (e.g., \`01\`).
+    -   Milliseconds (ms) MUST ALWAYS have three digits (e.g., \`050\`).
+    -   **PERFECT Example:** \`00:05:14,889 --> 00:05:15,699\`
+    -   **INCORRECT Example:** \`05:14,889 --> 05:15,699\` (WRONG! Missing the hours \`HH:\` part).
+4.  **SEPARATION:** Each subtitle block MUST be separated by a single blank line.
+5.  **FOCUS:** Transcribe human speech only.
+
+**COMPLETE EXAMPLE OF CORRECT OUTPUT (VERY SHORT LINES):**
+\`\`\`
+1
+00:00:01,155 --> 00:00:02,500
+Even a cultivator like us,
+
+2
+00:00:02,600 --> 00:00:04,950
+almost died climbing it.
+\`\`\`
+
+Your entire output must be ONLY the SRT content. Do not include any other explanations or comments.`;
+                } else {
+                     formatInstructions = `
+IMPORTANT INSTRUCTIONS FOR SRT FORMAT:
+
+You MUST produce a valid SRT (SubRip Text) file. Each subtitle block MUST follow this exact structure:
+
+[INDEX]
+[START_TIME] --> [END_TIME]
+[SUBTITLE_TEXT]
+
+(A blank line separates this block from the next one)
+
+**RULES:**
+1.  **INDEX:** A sequential number starting from 1.
+2.  **TIMESTAMP (ABSOLUTE RULE):** The timestamp format is NON-NEGOTIABLE. You MUST strictly follow the \`HH:MM:SS,ms\` format for both start and end times.
+    -   The \`HH:\` (hours) part MUST ALWAYS be present, even if it is \`00\`.
+    -   All components (Hours, Minutes, Seconds) MUST ALWAYS be present and padded with a leading zero if they are a single digit (e.g., \`01\`, not \`1\`).
+    -   Milliseconds (ms) MUST ALWAYS have three digits, padded with leading zeros if necessary (e.g., \`050\`, not \`50\`).
+    -   **PERFECT Example:** \`00:05:14,889 --> 00:05:15,699\`
+    -   **INCORRECT Example:** \`05:14,889 --> 05:15,699\` (WRONG! Missing the hours \`HH:\` part).
+3.  **SUBTITLE TEXT:** The transcribed text for that time segment.
+4.  **SEPARATION:** Each subtitle block MUST be separated by a single blank line (i.e., two newline characters).
+5.  **FOCUS:** Prioritize transcribing human speech. Ignore background noise.
+6.  **GRANULARITY:** Create a new subtitle entry for every short phrase or clause. Do not group multiple sentences into a single block.
+
+**COMPLETE EXAMPLE OF CORRECT OUTPUT:**
+\`\`\`
+1
+00:00:01,155 --> 00:00:03,855
+This is the first subtitle.
+
+2
+00:00:04,200 --> 00:00:06,950
+This is the second one.
+\`\`\`
+
+Your entire output must be ONLY the SRT content. Do not include any other explanations, comments, or introductory text.`;
+                }
             } else { // 'text' format
                 formatInstructions = 'Prioritize transcribing human speech and ignore background noise as much as possible. Provide only the transcribed text, without any additional comments or explanations.';
             }
@@ -337,7 +346,7 @@ ${formatInstructions}`;
         };
 
         const generateTranscriptionGemini = async (mediaPart, transcriptionFormat, shouldTranslate, lang) => {
-             const prompt = getGeminiPrompt(transcriptionFormat, shouldTranslate, lang);
+             const prompt = getGeminiPrompt(transcriptionFormat, shouldTranslate, lang, state.model);
  
              const ai = new GoogleGenAI({ apiKey: state.apiKey });
              const response = await ai.models.generateContent({
@@ -346,65 +355,6 @@ ${formatInstructions}`;
              });
              return response.text;
         };
-        
-        const generateTranscriptionWhisperCompatible = async (file, model, format, apiUrl, providerName) => {
-            const formData = new FormData();
-            formData.append('file', file);
-            formData.append('model', model);
-            const responseFormat = format === 'text' ? 'json' : 'srt';
-            formData.append('response_format', responseFormat);
-
-            const response = await fetch(apiUrl, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${state.apiKey}`
-                },
-                body: formData
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error.message || `An unknown error occurred with the ${providerName} API.`);
-            }
-
-            if (responseFormat === 'json') {
-                const result = await response.json();
-                return result.text;
-            } else {
-                return await response.text();
-            }
-        };
-
-        const generateTranscriptionDeepgram = async (file, model, format) => {
-            const queryParams = `?model=${model}&punctuate=true${format === 'srt' ? '&utterances=true' : ''}`;
-            const apiUrl = `https://api.deepgram.com/v1/listen${queryParams}`;
-
-            const response = await fetch(apiUrl, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Token ${state.apiKey}`,
-                    'Content-Type': file.type,
-                },
-                body: file
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.reason || errorData.err_msg || `An unknown error occurred with the Deepgram API.`);
-            }
-
-            const result = await response.json();
-
-            if (format === 'srt') {
-                if (!result.results.utterances) {
-                    throw new Error('Could not get SRT data. The API response did not contain utterances.');
-                }
-                return jsonToSrt_deepgram(result.results.utterances);
-            } else { // text
-                return result.results.channels[0].alternatives[0].transcript;
-            }
-        };
-
 
         // --- UI HELPER & RENDER FUNCTIONS ---
         const createActionButton = (type, id, text, content) => {
@@ -455,7 +405,7 @@ ${formatInstructions}`;
             dom.apiKeyInput.value = state.apiKey;
             
             // Button states
-            dom.transcribeBtn.disabled = state.isLoading || (!state.audioFile && !state.sourceUrl) || !state.apiKey;
+            dom.transcribeBtn.disabled = state.isLoading || !state.audioFile;
             dom.copyBtn.disabled = !state.originalTranscription || state.isLoading;
             dom.downloadBtn.disabled = !state.originalTranscription || state.isLoading;
 
@@ -470,49 +420,25 @@ ${formatInstructions}`;
                 dom.resultSection.classList.add('hidden');
             }
 
-            // API Provider specific UI changes
-            if (state.apiProvider === 'gemini') {
-                dom.apiKeyInput.placeholder = 'Paste your Gemini API key here...';
-                dom.apiKeyHelpText.innerHTML = `Your key is stored only in your browser. Get your key from <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:underline">Google AI Studio</a>.`;
-                dom.translateSection.classList.remove('hidden');
-                dom.tabUrl.classList.remove('hidden');
-            } else if (state.apiProvider === 'deepgram') {
-                dom.apiKeyInput.placeholder = 'Paste your Deepgram API key here...';
-                dom.apiKeyHelpText.innerHTML = `Your key is stored only in your browser. Get your key from <a href="https://console.deepgram.com/" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:underline">Deepgram Console</a>.`;
-                dom.translateSection.classList.add('hidden');
-                dom.tabUrl.classList.add('hidden');
-                 if (state.inputType === 'url') {
-                   setState({ inputType: 'file' });
-                }
-            } else { // openai or bytez
-                const isBytez = state.apiProvider === 'bytez';
-                const providerName = isBytez ? 'Bytez' : 'OpenAI';
-                const providerUrl = isBytez ? 'https://bytez.com/' : 'https://platform.openai.com/api-keys';
-                const providerLinkText = isBytez ? 'Bytez.com' : 'OpenAI Platform';
-
-                dom.apiKeyInput.placeholder = `Paste your ${providerName} API key here...`;
-                dom.apiKeyHelpText.innerHTML = `Your key is stored only in your browser. Get your key from <a href="${providerUrl}" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:underline">${providerLinkText}</a>.`;
-                dom.translateSection.classList.add('hidden');
-                dom.tabUrl.classList.add('hidden');
-                 if (state.inputType === 'url') {
-                   setState({ inputType: 'file' });
-                }
-            }
+            // API Key Help Text (Hardcoded for Gemini)
+            dom.apiKeyInput.placeholder = 'Paste your Gemini API key here...';
+            dom.apiKeyHelpText.innerHTML = `Your key is stored only in your browser. Get your key from <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:underline">Google AI Studio</a>.`;
+            dom.translateSection.classList.remove('hidden');
 
             // Result section visibility
             if (state.originalTranscription) {
                 dom.resultSection.classList.remove('hidden');
                 dom.resultLoader.classList.add('hidden');
                 dom.resultDisplay.classList.remove('hidden');
-                if (state.translate && state.apiProvider === 'gemini') {
+                if (state.translate) {
                     dom.singleResultContainer.classList.add('hidden');
                     dom.tableResultContainer.classList.remove('hidden');
-                    dom.resultHeading.textContent = `7. Transcription & Translation Result`;
+                    dom.resultHeading.textContent = `6. Transcription & Translation Result`;
                     populateTable();
                 } else {
                     dom.singleResultContainer.classList.remove('hidden');
                     dom.tableResultContainer.classList.add('hidden');
-                    dom.resultHeading.textContent = `7. Transcription Result`;
+                    dom.resultHeading.textContent = `6. Transcription Result`;
                     dom.transcriptionOutput.value = state.originalTranscription;
                 }
             } else if (!state.isLoading) {
@@ -521,23 +447,6 @@ ${formatInstructions}`;
 
             // Update download button text
             dom.downloadBtnText.textContent = `Download .${state.format}`;
-
-            // Tab styles and panel visibility
-            if (state.inputType === 'file') {
-                dom.tabFile.classList.add('border-sky-500', 'text-sky-400');
-                dom.tabFile.classList.remove('border-transparent', 'text-slate-400', 'hover:border-slate-500');
-                dom.tabUrl.classList.add('border-transparent', 'text-slate-400', 'hover:border-slate-500');
-                dom.tabUrl.classList.remove('border-sky-500', 'text-sky-400');
-                dom.fileUploadPanel.classList.remove('hidden');
-                dom.urlUploadPanel.classList.add('hidden');
-            } else { // 'url'
-                dom.tabUrl.classList.add('border-sky-500', 'text-sky-400');
-                dom.tabUrl.classList.remove('border-transparent', 'text-slate-400', 'hover:border-slate-500');
-                dom.tabFile.classList.add('border-transparent', 'text-slate-400', 'hover:border-slate-500');
-                dom.tabFile.classList.remove('border-sky-500', 'text-sky-400');
-                dom.fileUploadPanel.classList.add('hidden');
-                dom.urlUploadPanel.classList.remove('hidden');
-            }
         };
 
         // --- EVENT HANDLERS & LOGIC ---
@@ -556,7 +465,7 @@ ${formatInstructions}`;
         const handleFileSelect = (file) => {
             if (!file) return;
 
-            setState({ audioFile: file, sourceUrl: '', errorMessage: '', originalTranscription: '' });
+            setState({ audioFile: file, errorMessage: '', originalTranscription: '' });
             dom.fileNameDisplay.textContent = `Selected: ${file.name}`;
             dom.fileNameDisplay.classList.remove('hidden');
         };
@@ -592,53 +501,25 @@ ${formatInstructions}`;
         };
 
         const handleTranscribe = async () => {
+            if (!state.apiKey) {
+                setState({ errorMessage: 'Please enter your API key to proceed.' });
+                return;
+            }
+            
             setState({ isLoading: true, errorMessage: '', originalTranscription: '', translatedTranscription: '' });
             dom.resultSection.classList.remove('hidden');
             dom.resultLoader.classList.remove('hidden');
             dom.resultDisplay.classList.add('hidden');
 
             try {
-                let responseText;
-                if (state.apiProvider === 'gemini') {
-                    let mediaPart;
-                    if (state.inputType === 'file' && state.audioFile) {
-                        mediaPart = await fileToGenerativePart(state.audioFile);
-                    } else if (state.inputType === 'url' && state.sourceUrl) {
-                        const urlPattern = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/;
-                        if (!urlPattern.test(state.sourceUrl)) {
-                            throw new Error('Please enter a valid URL.');
-                        }
-                        const extension = state.sourceUrl.split('.').pop().toLowerCase();
-                        const mimeTypeMap = {
-                            'mp3': 'audio/mpeg', 'wav': 'audio/wav', 'ogg': 'audio/ogg', 'm4a': 'audio/mp4',
-                            'mp4': 'video/mp4', 'webm': 'video/webm', 'mov': 'video/quicktime'
-                        };
-                        const mimeType = mimeTypeMap[extension] || 'application/octet-stream';
-
-                        mediaPart = { fileData: { mimeType: mimeType, uri: state.sourceUrl } };
-                    } else {
-                        throw new Error('Please provide an audio/video source.');
-                    }
-                    responseText = await generateTranscriptionGemini(mediaPart, state.format, state.translate, state.targetLanguage);
-                } else if (state.apiProvider === 'deepgram') {
-                     if (!state.audioFile) {
-                         throw new Error('Please select a file to transcribe.');
-                    }
-                    responseText = await generateTranscriptionDeepgram(state.audioFile, state.model, state.format);
+                if (!state.audioFile) {
+                    throw new Error('Please select a file to transcribe.');
                 }
-                else { // openai or bytez
-                    if (!state.audioFile) {
-                         throw new Error('Please select a file to transcribe.');
-                    }
-                    const apiUrl = state.apiProvider === 'openai' 
-                        ? 'https://api.openai.com/v1/audio/transcriptions'
-                        : 'https://api.bytez.com/v1/audio/transcriptions';
-                    const providerName = state.apiProvider === 'openai' ? 'OpenAI' : 'Bytez';
-                    responseText = await generateTranscriptionWhisperCompatible(state.audioFile, state.model, state.format, apiUrl, providerName);
-                }
+                
+                const mediaPart = await fileToGenerativePart(state.audioFile);
+                const responseText = await generateTranscriptionGemini(mediaPart, state.format, state.translate, state.targetLanguage);
 
-
-                if (state.translate && state.apiProvider === 'gemini') {
+                if (state.translate) {
                     const parts = responseText.split('---TRANSLATION_SEPARATOR---');
                     if (parts.length === 2) {
                         setState({
@@ -656,9 +537,6 @@ ${formatInstructions}`;
                 let displayError = e.message;
                  if (displayError.includes('API key not valid') || (e.message && e.message.toLowerCase().includes('incorrect api key'))) {
                     displayError = 'Your API Key is not valid. Please check it and try again.';
-                } else if (displayError.includes('Unsupported file uri')) {
-                    displayError = `The provided URL could not be accessed. This might be because it's a private link, temporary, or on a server that blocks requests. Please try downloading the file and using the "Upload File" tab.`;
-                    setState({ inputType: 'file' });
                 }
                 setState({ errorMessage: displayError });
             } finally {
@@ -668,64 +546,18 @@ ${formatInstructions}`;
         };
 
         const setupInitialModels = () => {
-            const provider = state.apiProvider;
-            dom.modelSelect.innerHTML = config.models[provider]
+            dom.modelSelect.innerHTML = config.models.gemini
                 .map(model => `<option value="${model.value}">${model.text}</option>`)
                 .join('');
             dom.modelSelect.value = state.model;
         }
 
         // --- EVENT LISTENERS ---
-        dom.apiProviderSelect.addEventListener('change', (e) => {
-            const provider = e.target.value;
-            const defaultModel = config.models[provider][0].value;
-            
-            const newState = {
-                apiProvider: provider,
-                model: defaultModel,
-                apiKey: '', // Clear API key on provider change
-                audioFile: null,
-                sourceUrl: '',
-                originalTranscription: '',
-                translatedTranscription: '',
-                errorMessage: '',
-                inputType: 'file',
-            };
-            
-            // If switching to Bytez, pre-fill the key again
-            if (provider === 'bytez') {
-                newState.apiKey = 'd2f1679b8da24c5ad3d4320d98f72355';
-            }
-
-            setState(newState);
-
-            dom.modelSelect.innerHTML = config.models[provider]
-                .map(model => `<option value="${model.value}">${model.text}</option>`)
-                .join('');
-            
-            dom.fileInput.value = '';
-            dom.urlInput.value = '';
-            dom.fileNameDisplay.classList.add('hidden');
-        });
-
         dom.apiKeyInput.addEventListener('input', (e) => {
           setState({ apiKey: e.target.value.trim() });
         });
         
         dom.modelSelect.addEventListener('change', (e) => setState({ model: e.target.value }));
-
-        dom.urlInput.addEventListener('input', (e) => {
-          setState({ sourceUrl: e.target.value.trim(), audioFile: null, originalTranscription: '' });
-          if(e.target.value.trim()){
-            dom.fileNameDisplay.textContent = `URL: ${e.target.value.trim()}`;
-            dom.fileNameDisplay.classList.remove('hidden');
-          } else {
-            dom.fileNameDisplay.classList.add('hidden');
-          }
-        });
-
-        dom.tabFile.addEventListener('click', () => setState({ inputType: 'file' }));
-        dom.tabUrl.addEventListener('click', () => setState({ inputType: 'url' }));
         
         dom.fileUploadArea.addEventListener('click', () => dom.fileInput.click());
         dom.fileInput.addEventListener('change', (e) => handleFileSelect(e.target.files[0]));
@@ -739,7 +571,7 @@ ${formatInstructions}`;
         ['dragenter', 'dragover'].forEach(eventName => {
             dom.fileUploadArea.addEventListener(eventName, () => dom.fileUploadArea.classList.add('border-sky-500', 'bg-slate-700/50'), false);
         });
-        ['dragleave', 'drop'].forEach(eventName => {
+        ['draleave', 'drop'].forEach(eventName => {
             dom.fileUploadArea.addEventListener(eventName, () => dom.fileUploadArea.classList.remove('border-sky-500', 'bg-slate-700/50'), false);
         });
         dom.fileUploadArea.addEventListener('drop', (e) => handleFileSelect(e.dataTransfer.files[0]));
