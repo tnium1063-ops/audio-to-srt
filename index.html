@@ -43,11 +43,9 @@
               <main class="space-y-8 p-6 sm:p-8 bg-slate-800/50 rounded-xl shadow-2xl border border-slate-700">
                 
                 <div class="space-y-4">
-                  <h2 class="text-xl font-semibold text-slate-200">1. Enter Your Gemini API Key</h2>
-                  <input type="password" id="api-key-input" placeholder="Paste your API key here..." class="w-full p-3 bg-slate-700 border border-slate-600 text-slate-200 rounded-md focus:ring-2 focus:ring-sky-500 focus:border-sky-500" />
-                  <p id="api-key-help-text" class="text-xs text-slate-500">
-                      Your key is stored only in your browser.
-                  </p>
+                  <h2 class="text-xl font-semibold text-slate-200">1. Provide your API Key</h2>
+                  <input type="password" id="api-key-input" placeholder="Enter your Gemini API Key" class="w-full p-3 bg-slate-700 border border-slate-600 text-slate-200 rounded-md focus:ring-2 focus:ring-sky-500 focus:border-sky-500">
+                  <p class="text-xs text-slate-500">Your API key is stored only in your browser and never sent to our servers.</p>
                 </div>
 
                 <div class="space-y-4">
@@ -73,7 +71,10 @@
                       <p class="mt-2 text-xs text-slate-500">Note: Larger files may take longer to upload and process.</p>
                     </div>
 
-                    <p id="file-name-display" class="text-lg text-green-400 hidden truncate p-2 bg-slate-700/50 rounded-md"></p>
+                    <div id="file-info-container" class="hidden">
+                        <p id="file-name-display" class="text-lg text-green-400 truncate p-2 bg-slate-700/50 rounded-md"></p>
+                        <p id="token-count-display" class="text-sm text-slate-400 mt-2 ml-2"></p>
+                    </div>
                 </div>
       
                 <div class="space-y-4">
@@ -110,7 +111,7 @@
                       </span>
                       <span id="transcribe-spinner" class="hidden flex items-center justify-center">
                         <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                        <span class="ml-2">Processing...</span>
+                        <span id="processing-status-text" class="ml-2">Processing...</span>
                       </span>
                   </button>
                 </div>
@@ -121,7 +122,7 @@
                    <h2 id="result-heading" class="text-xl font-semibold text-slate-200">6. Result</h2>
                    <div id="result-loader" class="hidden flex flex-col items-center justify-center p-8 bg-slate-800 rounded-md text-slate-400">
                      <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-sky-400"></div>
-                     <p class="mt-4">Processing your file... Please wait.</p>
+                     <p id="result-loader-text" class="mt-4">Processing your file... Please wait.</p>
                    </div>
                    <div id="result-display" class="w-full space-y-4">
                      <!-- Single result view -->
@@ -170,11 +171,12 @@
         // --- DOM ELEMENTS (Grab all at once) ---
         const dom = {
             apiKeyInput: document.getElementById('api-key-input'),
-            apiKeyHelpText: document.getElementById('api-key-help-text'),
             modelSelect: document.getElementById('model-select'),
             fileUploadArea: document.getElementById('file-upload-area'),
             fileInput: document.getElementById('file-input'),
+            fileInfoContainer: document.getElementById('file-info-container'),
             fileNameDisplay: document.getElementById('file-name-display'),
+            tokenCountDisplay: document.getElementById('token-count-display'),
             formatBtns: document.querySelectorAll('.format-btn'),
             translateSection: document.getElementById('translate-section'),
             translateCheckbox: document.getElementById('translate-checkbox'),
@@ -182,9 +184,11 @@
             transcribeBtn: document.getElementById('transcribe-btn'),
             transcribeBtnContent: document.getElementById('transcribe-btn-content'),
             transcribeSpinner: document.getElementById('transcribe-spinner'),
+            processingStatusText: document.getElementById('processing-status-text'),
             errorDisplay: document.getElementById('error-display'),
             resultSection: document.getElementById('result-section'),
             resultLoader: document.getElementById('result-loader'),
+            resultLoaderText: document.getElementById('result-loader-text'),
             resultDisplay: document.getElementById('result-display'),
             resultHeading: document.getElementById('result-heading'),
             singleResultContainer: document.getElementById('single-result-container'),
@@ -207,7 +211,7 @@
                     { value: 'gemini-2.5-flash', text: 'Gemini 2.5 Flash (Fastest)' },
                     { value: 'gemini-flash-lite-latest', text: 'Gemini Flash Lite (Lightweight)' },
                 ],
-            }
+            },
         }
 
         // --- STATE MANAGEMENT ---
@@ -215,6 +219,8 @@
             apiKey: '',
             model: 'gemini-2.5-pro',
             audioFile: null,
+            tokenCount: null,
+            isCountingTokens: false,
             originalTranscription: '',
             translatedTranscription: '',
             isLoading: false,
@@ -233,127 +239,114 @@
         const copyIconSVG = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mr-2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 01-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 0 011.5 .124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 00-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 01-1.125-1.125v-9.25m9.375 0V9.375c0 .621-.504 1.125-1.125 1.125h-1.5" /></svg>`;
         const checkIconSVG = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mr-2 text-green-400"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>`;
 
-        // --- API SERVICE LOGIC ---
-        const getGeminiPrompt = (format, shouldTranslate, lang, model) => {
-            let basePrompt;
+        // --- API & PROMPT LOGIC ---
+        const getTranscriptionPrompt = (format) => {
             let formatInstructions;
-
             if (format === 'srt') {
-                if (model === 'gemini-flash-lite-latest' || model === 'gemini-2.5-flash') {
-                    formatInstructions = `
-IMPORTANT INSTRUCTIONS FOR SRT FORMAT (STRICT FOR LITE/FLASH MODELS):
+                formatInstructions = `
+You are an expert, mechanical subtitle generator. Your ONLY job is to follow these rules precisely.
 
-You MUST produce a valid SRT (SubRip Text) file. Each subtitle block MUST follow this exact structure:
+**THREE ABSOLUTE RULES FOR SRT GENERATION:**
+1.  **STRICT TIME FORMAT:** The timestamp format **MUST ALWAYS** be \`HH:MM:SS,ms\`. The hours part (\`HH:\`) **MUST** be included, even if it is \`00\`.
+    - **CRITICAL FAILURE EXAMPLE (DO NOT DO THIS):** \`09:07,562 --> 09:13,672\` (This is WRONG. It is missing the hours part.)
+    - **CORRECT EXAMPLE:** \`00:09:07,562 --> 00:09:13,672\` (This is PERFECT.)
 
-[INDEX]
-[START_TIME] --> [END_TIME]
-[SUBTITLE_TEXT]
+2.  **STRICT DURATION LIMIT: 4 SECONDS.** A single subtitle entry (from start time to end time) **MUST NOT** be longer than 4 seconds. You **MUST** split longer spoken phrases into multiple smaller entries to obey this rule.
 
-(A blank line separates this block from the next one)
+3.  **STRICT LENGTH LIMIT: 8 WORDS.** The text for a single entry **MUST NOT** exceed 8 words. You **MUST** break longer sentences into multiple entries.
 
-**CRITICAL RULES FOR LITE/FLASH MODELS:**
-1.  **EXTREMELY SHORT LINES (ABSOLUTE RULE):** This is the most important rule. You MUST break down all sentences into very short, readable chunks for subtitles.
-    *   **NEVER** let a single subtitle text line exceed 40 characters.
-    *   **ALWAYS** create a new subtitle entry immediately after a comma (",").
-    *   **ALWAYS** create a new entry at natural speaking pauses.
-    *   It is much better to have many short lines than one long line. **DO NOT** combine multiple clauses or long phrases into a single subtitle entry.
-2.  **INDEX:** A sequential number starting from 1.
-3.  **TIMESTAMP (ABSOLUTE RULE):** The timestamp format is NON-NEGOTIABLE. You MUST strictly follow the \`HH:MM:SS,ms\` format.
-    -   The \`HH:\` (hours) part MUST ALWAYS be present, even if it is \`00\`.
-    -   All components (Hours, Minutes, Seconds) MUST ALWAYS be present and padded with a leading zero if they are a single digit (e.g., \`01\`).
-    -   Milliseconds (ms) MUST ALWAYS have three digits (e.g., \`050\`).
-    -   **PERFECT Example:** \`00:05:14,889 --> 00:05:15,699\`
-    -   **INCORRECT Example:** \`05:14,889 --> 05:15,699\` (WRONG! Missing the hours \`HH:\` part).
-4.  **SEPARATION:** Each subtitle block MUST be separated by a single blank line.
-5.  **FOCUS:** Transcribe human speech only.
+---
+**EXAMPLE OF HOW TO SPLIT A LONG SENTENCE (CRITICAL):**
 
-**COMPLETE EXAMPLE OF CORRECT OUTPUT (VERY SHORT LINES):**
+**INCORRECT (VIOLATES ALL RULES - duration is ~10 seconds, has too many words):**
 \`\`\`
-1
-00:00:01,155 --> 00:00:02,500
-Even a cultivator like us,
-
-2
-00:00:02,600 --> 00:00:04,950
-almost died climbing it.
+40
+00:04:04,189 --> 00:04:13,859
+Bagus, Paviliun Xuanyuan menyediakan mobil "70" dengan fungsi deteksi sinyal. Mobil ini bisa mendeteksi sumber sinyal yang mengeluarkan perintah berskala besar dalam radius lima kilometer, Han Lie tidak akan bisa bersembunyi.
 \`\`\`
 
-Your entire output must be ONLY the SRT content. Do not include any other explanations or comments.`;
-                } else {
-                     formatInstructions = `
-IMPORTANT INSTRUCTIONS FOR SRT FORMAT:
-
-You MUST produce a valid SRT (SubRip Text) file. Each subtitle block MUST follow this exact structure:
-
-[INDEX]
-[START_TIME] --> [END_TIME]
-[SUBTITLE_TEXT]
-
-(A blank line separates this block from the next one)
-
-**RULES:**
-1.  **INDEX:** A sequential number starting from 1.
-2.  **TIMESTAMP (ABSOLUTE RULE):** The timestamp format is NON-NEGOTIABLE. You MUST strictly follow the \`HH:MM:SS,ms\` format for both start and end times.
-    -   The \`HH:\` (hours) part MUST ALWAYS be present, even if it is \`00\`.
-    -   All components (Hours, Minutes, Seconds) MUST ALWAYS be present and padded with a leading zero if they are a single digit (e.g., \`01\`, not \`1\`).
-    -   Milliseconds (ms) MUST ALWAYS have three digits, padded with leading zeros if necessary (e.g., \`050\`, not \`50\`).
-    -   **PERFECT Example:** \`00:05:14,889 --> 00:05:15,699\`
-    -   **INCORRECT Example:** \`05:14,889 --> 05:15,699\` (WRONG! Missing the hours \`HH:\` part).
-3.  **SUBTITLE TEXT:** The transcribed text for that time segment.
-4.  **SEPARATION:** Each subtitle block MUST be separated by a single blank line (i.e., two newline characters).
-5.  **FOCUS:** Prioritize transcribing human speech. Ignore background noise.
-6.  **GRANULARITY:** Create a new subtitle entry for every short phrase or clause. Do not group multiple sentences into a single block.
-
-**COMPLETE EXAMPLE OF CORRECT OUTPUT:**
+**CORRECT (FOLLOWS ALL RULES - each entry is short, under 4s, and has few words):**
 \`\`\`
-1
-00:00:01,155 --> 00:00:03,855
-This is the first subtitle.
+40
+00:04:04,189 --> 00:04:06,859
+Bagus, Paviliun Xuanyuan menyediakan
+mobil "70"
 
-2
-00:00:04,200 --> 00:00:06,950
-This is the second one.
+41
+00:04:07,109 --> 00:04:09,219
+dengan fungsi deteksi sinyal.
+
+42
+00:04:09,459 --> 00:04:11,689
+Mobil ini bisa mendeteksi sumber sinyal
+
+43
+00:04:11,889 --> 00:04:13,859
+dalam radius lima kilometer.
 \`\`\`
-
-Your entire output must be ONLY the SRT content. Do not include any other explanations, comments, or introductory text.`;
-                }
+---
+Your entire output must be ONLY the valid SRT content, following these rules precisely for the entire duration of the audio.`;
             } else { // 'text' format
-                formatInstructions = 'Prioritize transcribing human speech and ignore background noise as much as possible. Provide only the transcribed text, without any additional comments or explanations.';
+                formatInstructions = 'Provide only the transcribed text, without any additional comments or explanations.';
             }
-
-            if (shouldTranslate) {
-                const translationInstruction = `
-After generating the transcription, you must then translate the entire result into **${lang}**. Then, you MUST separate the original transcription and the translated result with this exact delimiter:
----TRANSLATION_SEPARATOR---
-
-**Translation Rules:**
--   **Preserve Formatting:** If the format is SRT, you MUST maintain the exact SRT structure, including sequential numbering and timestamps. Only translate the text portion of each subtitle entry.
--   **Final Output Structure:** The final output must be structured as follows: [Original Transcription in requested format] ---TRANSLATION_SEPARATOR--- [Translated Transcription in the same format]. Do not include any other explanatory text.`;
-                
-                basePrompt = `You are an expert audio transcriptionist and translator. Your task is to first transcribe the audio from the provided file, and then translate it. The file may be a video; if so, process its audio track.
-
-**Step 1: Transcribe**
-${formatInstructions}
-
-**Step 2: Translate & Format Output**
-${translationInstruction}`;
-            } else {
-                basePrompt = `You are an expert audio transcriptionist. Your task is to transcribe the audio from the provided file. The file may be a video; if so, process its audio track.
+            return `You are an expert audio transcriptionist. Your task is to transcribe the audio from the provided file.
 ${formatInstructions}`;
-            }
-
-            return basePrompt;
         };
 
-        const generateTranscriptionGemini = async (mediaPart, transcriptionFormat, shouldTranslate, lang) => {
-             const prompt = getGeminiPrompt(transcriptionFormat, shouldTranslate, lang, state.model);
- 
+        const generateTranscriptionGemini = async (mediaPart) => {
+             const prompt = getTranscriptionPrompt(state.format);
              const ai = new GoogleGenAI({ apiKey: state.apiKey });
              const response = await ai.models.generateContent({
                  model: state.model,
                  contents: { parts: [{ text: prompt }, mediaPart] },
              });
              return response.text;
+        };
+        
+        const generateTranslationGemini = async (textToTranslate) => {
+            const prompt = `You are an expert translator. Translate the following text into ${state.targetLanguage}.
+- If the text is in SRT format, you MUST preserve the SRT structure perfectly (indexes, timestamps). Only translate the text portions.
+- If it is plain text, just translate the text.
+- Provide ONLY the translated text as your response, with no extra explanations or introductory text.
+
+Here is the text to translate:
+---
+${textToTranslate}
+---`;
+            const ai = new GoogleGenAI({ apiKey: state.apiKey });
+            const response = await ai.models.generateContent({
+                model: 'gemini-2.5-flash', // Use a fast model for translation
+                contents: { parts: [{ text: prompt }] },
+            });
+            return response.text;
+        };
+
+        const updateTokenCount = async () => {
+            if (!state.audioFile || !state.apiKey) {
+                setState({ tokenCount: null });
+                return;
+            }
+
+            setState({ isCountingTokens: true, tokenCount: null });
+
+            try {
+                const mediaPart = await fileToGenerativePart(state.audioFile);
+                const ai = new GoogleGenAI({ apiKey: state.apiKey });
+                const response = await ai.models.countTokens({
+                    model: state.model,
+                    contents: { parts: [mediaPart] },
+                });
+                setState({ tokenCount: response.totalTokens });
+            } catch (e) {
+                console.error('Error counting tokens:', e);
+                let msg = 'N/A';
+                if (e.message && e.message.includes('API key not valid')) {
+                    msg = 'Invalid API Key';
+                }
+                setState({ tokenCount: msg });
+            } finally {
+                setState({ isCountingTokens: false });
+            }
         };
 
         // --- UI HELPER & RENDER FUNCTIONS ---
@@ -401,36 +394,24 @@ ${formatInstructions}`;
         };
         
         const render = () => {
-            // Set API key input value from state
-            dom.apiKeyInput.value = state.apiKey;
-            
-            // Button states
-            dom.transcribeBtn.disabled = state.isLoading || !state.audioFile;
+            dom.transcribeBtn.disabled = state.isLoading || !state.audioFile || !state.apiKey;
             dom.copyBtn.disabled = !state.originalTranscription || state.isLoading;
             dom.downloadBtn.disabled = !state.originalTranscription || state.isLoading;
 
-            // Loading spinners
             dom.transcribeSpinner.classList.toggle('hidden', !state.isLoading);
             dom.transcribeBtnContent.classList.toggle('hidden', state.isLoading);
 
-            // Error display
             dom.errorDisplay.classList.toggle('hidden', !state.errorMessage);
             dom.errorDisplay.textContent = state.errorMessage;
             if (state.errorMessage) {
                 dom.resultSection.classList.add('hidden');
             }
 
-            // API Key Help Text (Hardcoded for Gemini)
-            dom.apiKeyInput.placeholder = 'Paste your Gemini API key here...';
-            dom.apiKeyHelpText.innerHTML = `Your key is stored only in your browser. Get your key from <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" class="text-sky-400 hover:underline">Google AI Studio</a>.`;
-            dom.translateSection.classList.remove('hidden');
-
-            // Result section visibility
             if (state.originalTranscription) {
                 dom.resultSection.classList.remove('hidden');
                 dom.resultLoader.classList.add('hidden');
                 dom.resultDisplay.classList.remove('hidden');
-                if (state.translate) {
+                if (state.translate && state.translatedTranscription) {
                     dom.singleResultContainer.classList.add('hidden');
                     dom.tableResultContainer.classList.remove('hidden');
                     dom.resultHeading.textContent = `6. Transcription & Translation Result`;
@@ -444,13 +425,27 @@ ${formatInstructions}`;
             } else if (!state.isLoading) {
                  dom.resultSection.classList.add('hidden');
             }
+            
+            if (state.audioFile) {
+                dom.fileInfoContainer.classList.remove('hidden');
+                if (state.isCountingTokens) {
+                    dom.tokenCountDisplay.innerHTML = `<span class="flex items-center"><div class="animate-spin rounded-full h-4 w-4 border-b-2 border-slate-400 mr-2"></div> Counting tokens...</span>`;
+                } else if (typeof state.tokenCount === 'number') {
+                    dom.tokenCountDisplay.textContent = `Estimated Input Tokens: ${state.tokenCount.toLocaleString()}`;
+                } else if (state.tokenCount) { // For error strings like 'N/A' or 'Invalid API Key'
+                    dom.tokenCountDisplay.textContent = `Estimated Input Tokens: ${state.tokenCount}`;
+                } else {
+                    dom.tokenCountDisplay.innerHTML = '';
+                }
+            } else {
+                dom.fileInfoContainer.classList.add('hidden');
+            }
 
-            // Update download button text
+
             dom.downloadBtnText.textContent = `Download .${state.format}`;
         };
 
         // --- EVENT HANDLERS & LOGIC ---
-
         const fileToGenerativePart = async (file) => {
             const base64EncodedDataPromise = new Promise((resolve) => {
                 const reader = new FileReader();
@@ -465,9 +460,9 @@ ${formatInstructions}`;
         const handleFileSelect = (file) => {
             if (!file) return;
 
-            setState({ audioFile: file, errorMessage: '', originalTranscription: '' });
+            setState({ audioFile: file, errorMessage: '', originalTranscription: '', tokenCount: null });
             dom.fileNameDisplay.textContent = `Selected: ${file.name}`;
-            dom.fileNameDisplay.classList.remove('hidden');
+            updateTokenCount();
         };
 
         const handleCopy = async (text, btnIconContainer, btnTextEl) => {
@@ -502,7 +497,7 @@ ${formatInstructions}`;
 
         const handleTranscribe = async () => {
             if (!state.apiKey) {
-                setState({ errorMessage: 'Please enter your API key to proceed.' });
+                setState({ errorMessage: 'Please provide your Gemini API Key.' });
                 return;
             }
             
@@ -512,38 +507,38 @@ ${formatInstructions}`;
             dom.resultDisplay.classList.add('hidden');
 
             try {
-                if (!state.audioFile) {
-                    throw new Error('Please select a file to transcribe.');
-                }
+                if (!state.audioFile) throw new Error('Please select a file to transcribe.');
+
+                dom.resultLoaderText.textContent = 'Processing your file... This may take a few minutes for large files.';
                 
+                // Process the entire file at once. This avoids corrupting video/audio files with manual slicing.
                 const mediaPart = await fileToGenerativePart(state.audioFile);
-                const responseText = await generateTranscriptionGemini(mediaPart, state.format, state.translate, state.targetLanguage);
+                const finalTranscription = await generateTranscriptionGemini(mediaPart);
+
+                setState({ originalTranscription: finalTranscription });
 
                 if (state.translate) {
-                    const parts = responseText.split('---TRANSLATION_SEPARATOR---');
-                    if (parts.length === 2) {
-                        setState({
-                            originalTranscription: parts[0].trim(),
-                            translatedTranscription: parts[1].trim()
-                        });
-                    } else {
-                       throw new Error('Translation failed. The model did not provide a translated version in the expected format.');
-                    }
-                } else {
-                    setState({ originalTranscription: responseText.trim(), translatedTranscription: '' });
+                    dom.resultLoaderText.textContent = 'Translating transcription...';
+                    const translatedText = await generateTranslationGemini(finalTranscription);
+                    setState({ translatedTranscription: translatedText });
                 }
+
             } catch (e) {
                 console.error(e);
-                let displayError = e.message;
-                 if (displayError.includes('API key not valid') || (e.message && e.message.toLowerCase().includes('incorrect api key'))) {
-                    displayError = 'Your API Key is not valid. Please check it and try again.';
+                let displayError = e.message || 'An unknown error occurred.';
+                if (displayError.includes('API key not valid')) {
+                    displayError = 'The configured API Key is not valid. Please check it and try again.';
+                } else if (e.message && e.message.toLowerCase().includes('invalid')) {
+                     displayError = `The server reported an error: "${e.message}". The file might be corrupted, in an unsupported format, or too large. Please try a different file.`;
                 }
                 setState({ errorMessage: displayError });
             } finally {
                 setState({ isLoading: false });
+                dom.resultLoaderText.textContent = 'Processing your file... Please wait.'; // Reset
                 dom.resultLoader.classList.add('hidden');
             }
         };
+
 
         const setupInitialModels = () => {
             dom.modelSelect.innerHTML = config.models.gemini
@@ -554,10 +549,14 @@ ${formatInstructions}`;
 
         // --- EVENT LISTENERS ---
         dom.apiKeyInput.addEventListener('input', (e) => {
-          setState({ apiKey: e.target.value.trim() });
+            setState({ apiKey: e.target.value });
+            updateTokenCount();
         });
-        
-        dom.modelSelect.addEventListener('change', (e) => setState({ model: e.target.value }));
+
+        dom.modelSelect.addEventListener('change', (e) => {
+            setState({ model: e.target.value });
+            updateTokenCount();
+        });
         
         dom.fileUploadArea.addEventListener('click', () => dom.fileInput.click());
         dom.fileInput.addEventListener('change', (e) => handleFileSelect(e.target.files[0]));
@@ -571,7 +570,7 @@ ${formatInstructions}`;
         ['dragenter', 'dragover'].forEach(eventName => {
             dom.fileUploadArea.addEventListener(eventName, () => dom.fileUploadArea.classList.add('border-sky-500', 'bg-slate-700/50'), false);
         });
-        ['draleave', 'drop'].forEach(eventName => {
+        ['dragleave', 'drop'].forEach(eventName => {
             dom.fileUploadArea.addEventListener(eventName, () => dom.fileUploadArea.classList.remove('border-sky-500', 'bg-slate-700/50'), false);
         });
         dom.fileUploadArea.addEventListener('drop', (e) => handleFileSelect(e.dataTransfer.files[0]));
